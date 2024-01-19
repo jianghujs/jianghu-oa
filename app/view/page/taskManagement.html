@@ -25,10 +25,10 @@
         <v-col cols="12" xs="12" sm="12" md="8" xl="9">
           <v-row class="jh-backend-form-container justify-end ma-0 py-3"> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 ">
-              <v-select prefix="负责人" class="jh-v-input" dense single-line filled v-model="serverSearchWhereLike.taskManagerId" :items="constantObj.member"></v-select>
+              <v-select prefix="负责人" :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhereLike.taskManagerId"></v-select>
             </v-col> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 pt-2 pt-sm-0">
-              <v-select prefix="参与人" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskMemberIdList" :items="constantObj.member"></v-select>
+              <v-select prefix="参与人" :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskMemberIdList"></v-select>
             </v-col> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 pt-2 pt-sm-0">
               <v-select prefix="优先级" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskLevel" :items="constantObj.taskLevel"></v-select>
@@ -83,6 +83,27 @@
           fixed-header
           class="jh-fixed-table-height elevation-0 mt-0 mb-xs-4"
         >
+          <template v-slot:item.taskLevel="{item, index}">
+            <v-autocomplete :items="constantObj.taskLevel" v-model="item.taskLevel" dense filled single-line class="jh-v-input" @change="doUiAction('updateTaskItem', {id: item.id, data: {taskLevel: item.taskLevel}})">
+              {{item.taskLevel}}
+            </v-autocomplete>
+          </template>
+          <template v-slot:item.taskStatus="{item, index}">
+            <v-autocomplete :items="constantObj.taskStatus" v-model="item.taskStatus" dense filled single-line class="jh-v-input" @change="doUiAction('updateTaskItem', {id: item.id, data: {taskStatus: item.taskStatus}})">
+              {{item.taskStatus}}
+            </v-autocomplete>
+          </template>
+          <template v-slot:item.taskStartAt="{item, index}">
+            <v-text-field v-model="item.taskStartAt" dense filled single-line class="jh-v-input" @blur="doUiAction('updateTaskItem', {id: item.id, data: {taskStartAt: item.taskStartAt}})">            </v-text-field>
+          </template>
+          <template v-slot:item.taskEndAt="{item, index}">
+            <v-text-field v-model="item.taskEndAt" dense filled single-line class="jh-v-input" @blur="doUiAction('updateTaskItem', {id: item.id, data: {taskEndAt: item.taskEndAt}})">            </v-text-field>
+          </template>
+          <template v-slot:item.taskManagerId="{item, index}">
+            <v-autocomplete :items="constantObj.member" v-model="item.taskManagerId" item-text="username" item-value="userId" dense filled single-line class="jh-v-input" @change="doUiAction('updateTaskItem', {id: item.id, data: {taskManagerId: item.taskManagerId}})">
+              {{item.taskManagerId}}
+            </v-autocomplete>
+          </template>
             
           <!-- 表格操作按钮 -->
           <template v-slot:item.action="{ item }">
@@ -121,7 +142,7 @@
         </v-row>
         <v-divider class="jh-divider"></v-divider>
         <v-row class="mt-0 px-4">
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4"class="d-none">
             <span class="jh-input-label">任务Id</span> 
             
           </v-col>
@@ -139,7 +160,7 @@
           </v-col>
           <v-col cols="12" sm="12" md="4">
             <span class="jh-input-label">任务标签</span> 
-            <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskTag"></v-text-field>
+            <v-combobox :multiple="true" class="jh-v-input" dense single-line filled v-model="createItem.taskTag"></v-combobox>
           </v-col>
           <v-col cols="12" sm="12" md="4">
             <span class="jh-input-label">任务开始时间</span> 
@@ -161,15 +182,19 @@
           </v-col>
           <v-col cols="12" sm="12" md="4">
             <span class="jh-input-label">负责人id</span> 
-            <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskManagerId"></v-text-field>
+            <v-autocomplete :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="createItem.taskManagerId"></v-autocomplete>
           </v-col>
           <v-col cols="12" sm="12" md="4">
             <span class="jh-input-label">参与人id</span> 
-            <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskMemberIdList"></v-text-field>
+            <v-autocomplete :items="constantObj.member" item-text="username" item-value="userId" :multiple="true" class="jh-v-input" dense single-line filled v-model="createItem.taskMemberIdList"></v-autocomplete>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
-            <span class="jh-input-label">任务关联的附件列表</span> 
-            <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskFileList"></v-text-field>
+          <v-col cols="12" sm="12" md="12">
+            <span class="jh-input-label">子任务</span> 
+            <task-child-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="createItem.taskChildList"></task-child-list>
+          </v-col>
+          <v-col cols="12" sm="12" md="12">
+            <span class="jh-input-label">附件列表</span> 
+            <task-attachment-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="createItem.taskFileList"></task-attachment-list>
           </v-col>
         </v-row>
         <!-- 抽屉操作按钮 -->
@@ -224,27 +249,45 @@
               </v-col>
               <v-col cols="12" sm="12" md="4" >
                 <span class="jh-input-label">任务标签</span> 
-                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.taskTag"></v-text-field>
+                <v-combobox :multiple="true" class="jh-v-input" dense single-line filled v-model="updateItem.taskTag"></v-combobox>
               </v-col>
               <v-col cols="12" sm="12" md="4" >
                 <span class="jh-input-label">任务开始时间</span> 
-                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.taskStartAt"></v-text-field>
+                <v-menu class="jh-v-input" transition="scale-transition" offset-y min-width="auto">
+                  <template v-slot:activator="{on, attrs}">
+                  <v-text-field v-bind="attrs" v-on="on" v-model="updateItem.taskStartAt" :rules="[]" class="jh-v-input" dense single-line filled readonly></v-text-field>
+                  </template>
+                  <v-date-picker color="success" elevation="20" v-model="updateItem.taskStartAt"></v-date-picker>
+                </v-menu>
               </v-col>
               <v-col cols="12" sm="12" md="4" >
                 <span class="jh-input-label">任务结束时间</span> 
-                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.taskEndAt"></v-text-field>
+                <v-menu class="jh-v-input" transition="scale-transition" offset-y min-width="auto">
+                  <template v-slot:activator="{on, attrs}">
+                  <v-text-field v-bind="attrs" v-on="on" v-model="updateItem.taskEndAt" :rules="[]" class="jh-v-input" dense single-line filled readonly></v-text-field>
+                  </template>
+                  <v-date-picker color="success" elevation="20" v-model="updateItem.taskEndAt"></v-date-picker>
+                </v-menu>
               </v-col>
               <v-col cols="12" sm="12" md="4" >
                 <span class="jh-input-label">负责人id</span> 
-                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.taskManagerId"></v-text-field>
+                <v-autocomplete :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="updateItem.taskManagerId"></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="12" md="4" >
                 <span class="jh-input-label">参与人id</span> 
-                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.taskMemberIdList"></v-text-field>
+                <v-autocomplete :items="constantObj.member" item-text="username" item-value="userId" :multiple="true" class="jh-v-input" dense single-line filled v-model="updateItem.taskMemberIdList"></v-autocomplete>
               </v-col>
-              <v-col cols="12" sm="12" md="4" >
-                <span class="jh-input-label">任务关联的附件列表</span> 
-                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.taskFileList"></v-text-field>
+              <v-col cols="12" sm="12" md="12" >
+                <span class="jh-input-label">子任务</span> 
+                <task-child-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="updateItem.taskChildList"></task-child-list>
+              </v-col>
+              <v-col cols="12" sm="12" md="12" >
+                <span class="jh-input-label">附件列表</span> 
+                <task-attachment-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="updateItem.taskFileList"></task-attachment-list>
+              </v-col>
+              <v-col cols="12" sm="12" md="12" >
+                <span class="jh-input-label">评论列表</span> 
+                <task-comment-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="updateItem.taskCommentList"></task-comment-list>
               </v-col> 
             </v-row>
 
@@ -290,6 +333,9 @@
 {% block vueScript %}
 {% include 'common/jianghuJs/fixedTableHeightV4.html' %}
 {% include 'component/tableRecordHistory.html' %}
+{% include "component/task-attachment-list.html" %}
+{% include "component/task-child-list.html" %}
+{% include "component/task-comment-list.html" %}
 
 <script type="module">
 new Vue({
@@ -365,6 +411,7 @@ new Vue({
       {text:"负责人",value:"taskManagerId",width:120},
       {text:"操作者",value:"operationByUser",width:120},
       {text:"操作时间",value:"operationAt",width:250},
+      {text:"操作",value:"action",width:120},
     ],
     tableData: [],
     tableLoading: true,
@@ -393,15 +440,21 @@ new Vue({
     },
   },
   computed: {},
-  async created() {
-    this.doUiAction('getTableData');
-  },
 
-  
+  created() {
+  this.doUiAction('getTableData');
+  this.doUiAction('getUserList');
+  },
   methods: {
     async doUiAction(uiActionId, uiActionData) {
       try {
-        switch (uiActionId) {
+        switch (uiActionId) { 
+          case 'getUserList': 
+            await this.getUserList(uiActionData);
+            break; 
+          case 'updateTaskItem': 
+            await this.updateTaskItem(uiActionData);
+            break;
           case 'getTableData':
             await this.getTableData();
             break;
@@ -485,7 +538,9 @@ new Vue({
     // ---------- <<<<<<<<<<< 获取表格数据 uiAction ---------
     // ---------- 新增数据 uiAction >>>>>>>>>> --------
     async prepareCreateFormData() {
-      this.createItem = {
+      this.createItem = { 
+        taskChildList: [], 
+        taskFileList: [],
       };
     },
     async openCreateDrawer() {
@@ -514,7 +569,8 @@ new Vue({
         taskEndAt: data.taskEndAt,
         taskManagerId: data.taskManagerId,
         taskMemberIdList: data.taskMemberIdList,
-        taskFileList: data.taskFileList,
+        taskChildList: JSON.stringify(data.taskChildList),
+        taskFileList: JSON.stringify(data.taskFileList),
       };
     },
     async doCreateItem() {
@@ -548,6 +604,8 @@ new Vue({
     // ---------- 修改数据 uiAction >>>>>>>>>>>> --------
     async prepareUpdateFormData(funObj) {
       this.updateItem = _.cloneDeep(funObj);
+      this.updateItem.taskChildList = JSON.parse(this.updateItem.taskChildList || '[]')
+      this.updateItem.taskFileList = JSON.parse(this.updateItem.taskFileList || '[]')
     },
     async openUpdateDrawer() {
       this.isUpdateDrawerShown = true;
@@ -575,7 +633,9 @@ new Vue({
         taskEndAt: data.taskEndAt,
         taskManagerId: data.taskManagerId,
         taskMemberIdList: data.taskMemberIdList,
-        taskFileList: data.taskFileList,
+        taskChildList: JSON.stringify(data.taskChildList),
+        taskFileList: JSON.stringify(data.taskFileList),
+        taskCommentList: JSON.stringify(data.taskCommentList),
       };
     },
     async doUpdateItem() {
@@ -633,7 +693,37 @@ new Vue({
       this.deleteItemId = null;
     },
     // ---------- <<<<<<<<<<< 删除数据 uiAction --------- 
-    // ---------- Custom uiAction >>>>>>>>>>>> --------
+    // ---------- Custom uiAction >>>>>>>>>>>> -------- 
+    async updateTaskItem({id, data}) {
+    await window.jhMask.show();
+  
+    await window.jianghuAxios({
+    data: {
+    appData: {
+      pageId: 'taskManagement',
+      actionId: 'updateItem',
+      actionData: data,
+      where: {id}
+    }
+    }
+    })
+    await window.jhMask.hide();
+  }, 
+    async getUserList() {
+    const rows = (
+    await window.jianghuAxios({
+    data: {
+      appData: {
+      pageId: 'taskManagement',
+      actionId: 'getUserList',
+      actionData: {},
+      orderBy: [{ column: 'operationAt', order: 'desc' }],
+      },
+    },
+    })
+    ).data.appData.resultData.rows;
+    this.constantObj.member = rows;
+  },
     // ---------- <<<<<<<<<<< Custom uiAction ---------
   }
 })

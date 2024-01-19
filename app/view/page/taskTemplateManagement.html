@@ -115,7 +115,7 @@
           </v-col>
           <v-col cols="12" sm="12" md="12">
             <span class="jh-input-label">审批人列表</span> 
-            <jh-json-table-editor class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="createItem.taskTemplatePersonList" :rules="validationRules.requireRules"></jh-json-table-editor>
+            <task-approval-person-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="createItem.taskTemplatePersonList" :rules="validationRules.requireRules"></task-approval-person-list>
           </v-col>
         </v-row>
         <!-- 抽屉操作按钮 -->
@@ -166,7 +166,7 @@
               </v-col>
               <v-col cols="12" sm="12" md="12" >
                 <span class="jh-input-label">审批人列表</span> 
-                <jh-json-table-editor class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="updateItem.taskTemplatePersonList" :rules="validationRules.requireRules"></jh-json-table-editor>
+                <task-approval-person-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="updateItem.taskTemplatePersonList" :rules="validationRules.requireRules"></task-approval-person-list>
               </v-col> 
             </v-row>
 
@@ -212,6 +212,7 @@
 {% block vueScript %}
 {% include 'common/jianghuJs/fixedTableHeightV4.html' %}
 {% include 'component/tableRecordHistory.html' %}
+{% include "component/task-approval-person-list.html" %}
 
 <script type="module">
 new Vue({
@@ -232,7 +233,7 @@ new Vue({
     isHelpPageDrawerLoaded: false,
     // ================================ pageContent ================================
     tableHeaderList: [
-      {text:"任务模板ID",value:"taskTemplateId",type:"v-text-field",width:80,sortable:true},
+      {text:"任务模板ID",value:"taskTemplateId",type:"v-text-field",width:80,sortable:true,idGenerate:{prefix:"RZ",bizId:"taskTemplateId",startValue:10001},colsAttrs:{class:"d-none"}},
       {text:"任务模板名称",value:"taskTemplateName",type:"v-text-field",width:80,sortable:true},
       {text:"创建时间",value:"taskTemplateCreateAt",type:"v-text-field",width:80,sortable:true},
       {text:"操作者用户名",value:"operationByUser",type:"v-text-field",width:80,sortable:true},
@@ -346,7 +347,8 @@ new Vue({
     // ---------- <<<<<<<<<<< 获取表格数据 uiAction ---------
     // ---------- 新增数据 uiAction >>>>>>>>>> --------
     async prepareCreateFormData() {
-      this.createItem = {
+      this.createItem = { 
+        taskTemplatePersonList: [],
       };
     },
     async openCreateDrawer() {
@@ -369,7 +371,7 @@ new Vue({
         taskTemplateId: data.taskTemplateId,
         taskTemplateName: data.taskTemplateName,
         taskTemplateIcon: data.taskTemplateIcon,
-        taskTemplatePersonList: data.taskTemplatePersonList,
+        taskTemplatePersonList: JSON.stringify(data.taskTemplatePersonList),
       };
     },
     async doCreateItem() {
@@ -403,6 +405,7 @@ new Vue({
     // ---------- 修改数据 uiAction >>>>>>>>>>>> --------
     async prepareUpdateFormData(funObj) {
       this.updateItem = _.cloneDeep(funObj);
+      this.updateItem.taskTemplatePersonList = JSON.parse(this.updateItem.taskTemplatePersonList || '[]')
     },
     async openUpdateDrawer() {
       this.isUpdateDrawerShown = true;
@@ -424,7 +427,7 @@ new Vue({
       this.updateActionData = {
         taskTemplateName: data.taskTemplateName,
         taskTemplateIcon: data.taskTemplateIcon,
-        taskTemplatePersonList: data.taskTemplatePersonList,
+        taskTemplatePersonList: JSON.stringify(data.taskTemplatePersonList),
       };
     },
     async doUpdateItem() {

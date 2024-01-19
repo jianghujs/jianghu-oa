@@ -40,7 +40,7 @@
   Vue.component("task-comment-list", {
     template: '#task-comment-list',
     props: {
-      comments: {
+      value: {
         type: Array,
         default: () => [],
       },
@@ -59,7 +59,7 @@
     computed: {
       // 倒序评论列表
       reversedComments() {
-        return this.comments.slice().reverse();
+        return this.value.slice().reverse();
       },
     },
     methods: {
@@ -68,15 +68,14 @@
       },
       postComment() {
         // 添加评论逻辑
-        this.comments.push({
-          id: this.comments.length + 1,
+        this.value.push({
+          id: this.value.length + 1,
           username: userInfo.username,
           userId: userInfo.userId,
           content: this.newComment,
           time: dayjs().format('YYYY-MM-DD HH:mm:ss'),
         })
         this.newComment = null
-        this.$emit('update:comments', this.comments)
         this.$emit('confirm')
         this.isInputExpanded = false;
       },

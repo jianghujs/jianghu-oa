@@ -3,7 +3,7 @@ const content = {
   pageId: 'journalManagement',
   table: 'task',
   pageName: '日志管理',
-  
+
   resourceList: [
     {
       actionId: 'selectItemList',
@@ -47,7 +47,9 @@ const content = {
     },
   ], // 额外resource { actionId, resourceType, resourceData }
   drawerList: [], // 抽屉列表 { key, title, contentList }
-  includeList: [], // 其他资源引入
+  includeList: [
+    { type: 'include', path: 'component/task-attachment-list.html' },
+  ], // 其他资源引入
   common: {
     data: {
       constantObj: {
@@ -96,10 +98,32 @@ const content = {
         requireRules: [(v) => !!v || '必填'],
       },
     },
+    created() {
+      this.doUiAction('getTableData');
+      this.doUiAction('getUserList');
+    },
     watch: {},
     computed: {},
-    doUiAction: {}, // 额外uiAction { [key]: [action1, action2]}
-    methods: {},
+    doUiAction: {
+      getUserList: ['getUserList'],
+    }, // 额外uiAction { [key]: [action1, action2]}
+    methods: {
+      async getUserList() {
+        const rows = (
+          await window.jianghuAxios({
+            data: {
+              appData: {
+                pageId: 'ticketManagement',
+                actionId: 'getUserList',
+                actionData: {},
+                orderBy: [{ column: 'operationAt', order: 'desc' }],
+              },
+            },
+          })
+        ).data.appData.resultData.rows;
+        this.constantObj.member = rows;
+      },
+    },
   },
   headContent: {
     helpDrawer: {}, // 自动初始化md文件
@@ -125,13 +149,21 @@ const content = {
     tag: 'jh-table',
     attrs: {},
     value: [
-      { text: "日志ID", value: "taskId", width: 120 },
-      { text: "日志名称", value: "taskTitle", width: 120 },
-      { text: "日志内容", value: "taskContent", width: 120 },
+      { text: '日志ID', value: 'taskId', width: 120 },
+      { text: '日志名称', value: 'taskTitle', width: 120 },
+      { text: '日志内容', value: 'taskContent', width: 120 },
 
-      { text: "操作者", value: "operationByUser", width: 120 },
-      { text: "操作时间", value: "operationAt", width: 250 },
-      { text: '操作', value: 'action', align: 'center', sortable: false, width: 120, class: 'fixed', cellClass: 'fixed' },
+      { text: '操作者', value: 'operationByUser', width: 120 },
+      { text: '操作时间', value: 'operationAt', width: 250 },
+      {
+        text: '操作',
+        value: 'action',
+        align: 'center',
+        sortable: false,
+        width: 120,
+        class: 'fixed',
+        cellClass: 'fixed',
+      },
     ],
   },
   createDrawerContent: {
@@ -144,6 +176,9 @@ const content = {
           bizId: 'taskId',
           startValue: 10001,
         },
+        colsAttrs: {
+          class: 'd-none',
+        },
       },
       {
         label: '日志名称',
@@ -152,12 +187,24 @@ const content = {
         required: true,
         rules: 'validationRules.requireRules',
       },
-      { label: '发给谁', model: 'taskMemberIdList', tag: 'v-autocomplete', attrs: {':items': 'constantObj.taskLevel'} },
+      {
+        label: '发给谁',
+        model: 'taskMemberIdList',
+        tag: 'v-autocomplete',
+        attrs: {
+          ':items': 'constantObj.taskTemplate',
+          'item-text': 'taskTemplateName',
+          'item-value': 'taskTemplateId',
+        },
+      },
       { label: '日志内容', cols: 12, model: 'taskContent', tag: 'v-textarea' },
       {
-        label: '任务关联的附件列表',
+        label: '附件列表',
+        cols: 12,
         model: 'taskFileList',
-        tag: 'v-text-field',
+        tag: 'task-attachment-list',
+        default: '[]',
+        valueType: 'json'
       },
     ],
   },
@@ -175,12 +222,29 @@ const content = {
             required: true,
             rules: 'validationRules.requireRules',
           },
-          { label: '发给谁', model: 'taskMemberIdList', tag: 'v-autocomplete', attrs: {':items': 'constantObj.taskLevel'} },
-          { label: '日志内容', cols: 12, model: 'taskContent', tag: 'v-textarea' },
           {
-            label: '任务关联的附件列表',
+            label: '发给谁',
+            model: 'taskMemberIdList',
+            tag: 'v-autocomplete',
+            attrs: {
+              ':items': 'constantObj.taskTemplate',
+              'item-text': 'taskTemplateName',
+              'item-value': 'taskTemplateId',
+            },
+          },
+          {
+            label: '日志内容',
+            cols: 12,
+            model: 'taskContent',
+            tag: 'v-textarea',
+          },
+          {
+            label: '附件列表',
+            cols: 12,
             model: 'taskFileList',
-            tag: 'v-text-field',
+            tag: 'task-attachment-list',
+            default: '[]',
+            valueType: 'json'
           },
         ],
       },

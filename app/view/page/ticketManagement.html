@@ -25,10 +25,10 @@
         <v-col cols="12" xs="12" sm="12" md="8" xl="9">
           <v-row class="jh-backend-form-container justify-end ma-0 py-3"> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 ">
-              <v-select prefix="负责人" class="jh-v-input" dense single-line filled v-model="serverSearchWhereLike.taskManagerId" :items="constantObj.member"></v-select>
+              <v-select prefix="负责人" :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhereLike.taskManagerId"></v-select>
             </v-col> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 pt-2 pt-sm-0">
-              <v-select prefix="参与人" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskMemberIdList" :items="constantObj.member"></v-select>
+              <v-select prefix="参与人" :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskMemberIdList"></v-select>
             </v-col>
             <div class="jh-backend-search-btn ml-2">
               <v-btn class="elevation-0 float-right mt-2 mt-md-0" color="success" small @click="doUiAction('getTableData')">
@@ -107,7 +107,7 @@
         </v-row>
         <v-divider class="jh-divider"></v-divider>
         <v-row class="mt-0 px-4">
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4"class="d-none">
             <span class="jh-input-label">审批Id</span> 
             
           </v-col>
@@ -128,7 +128,7 @@
             <v-select :items="constantObj.taskTemplate" item-text="taskTemplateName" item-value="taskTemplateId" @change="doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: createItem})" class="jh-v-input" dense single-line filled v-model="createItem.taskTemplateId" :rules="validationRules.requireRules"></v-select>
           </v-col>
           <v-col cols="12" sm="12" md="12"> 
-            <v-col v-if="createItem.taskAuditConfig.length" class="jh-v-input" dense single-line filled>
+            <v-col v-if="createItem.taskAuditConfig.length" class="jh-v-input" dense single-line filled v-model="createItem.taskAuditConfig">
         <v-row v-for="item in createItem.taskAuditConfig">
           <v-col cols="2">
             <v-text-field hide-actions hide-controls hide-details class="jh-v-input " dense filled single-line v-model="item.position"
@@ -143,7 +143,7 @@
           </v-col>
           <v-col cols="12" sm="12" md="12">
             <span class="jh-input-label">附件列表</span> 
-            <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskFileList"></v-text-field>
+            <task-attachment-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="createItem.taskFileList"></task-attachment-list>
           </v-col>
         </v-row>
         <!-- 抽屉操作按钮 -->
@@ -201,7 +201,7 @@
                 <v-select :items="constantObj.taskTemplate" item-text="taskTemplateName" item-value="taskTemplateId" @change="doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: updateItem})" class="jh-v-input" dense single-line filled v-model="updateItem.taskTemplateId" :rules="validationRules.requireRules"></v-select>
               </v-col>
               <v-col cols="12" sm="12" md="12" > 
-                <v-col v-if="updateItem.taskAuditConfig.length" class="jh-v-input" dense single-line filled>
+                <v-col v-if="updateItem.taskAuditConfig.length" class="jh-v-input" dense single-line filled v-model="updateItem.taskAuditConfig">
             <v-row v-for="item in updateItem.taskAuditConfig">
               <v-col cols="2">
                 <v-text-field hide-actions hide-controls hide-details class="jh-v-input " dense filled single-line v-model="item.position"
@@ -216,7 +216,7 @@
               </v-col>
               <v-col cols="12" sm="12" md="12" >
                 <span class="jh-input-label">附件列表</span> 
-                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.taskFileList"></v-text-field>
+                <task-attachment-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="updateItem.taskFileList"></task-attachment-list>
               </v-col> 
             </v-row>
 
@@ -262,6 +262,7 @@
 {% block vueScript %}
 {% include 'common/jianghuJs/fixedTableHeightV4.html' %}
 {% include 'component/tableRecordHistory.html' %}
+{% include "component/task-attachment-list.html" %}
 
 <script type="module">
 new Vue({
@@ -372,11 +373,15 @@ new Vue({
   created() {
   this.doUiAction('getTableData');
   this.doUiAction('getTaskTemplate');
+  this.doUiAction('getUserList');
   },
   methods: {
     async doUiAction(uiActionId, uiActionData) {
       try {
         switch (uiActionId) { 
+          case 'getUserList': 
+            await this.getUserList(uiActionData);
+            break; 
           case 'getTaskTemplate': 
             await this.getTaskTemplate(uiActionData);
             break; 
@@ -466,7 +471,9 @@ new Vue({
     // ---------- <<<<<<<<<<< 获取表格数据 uiAction ---------
     // ---------- 新增数据 uiAction >>>>>>>>>> --------
     async prepareCreateFormData() {
-      this.createItem = {
+      this.createItem = { 
+        taskAuditConfig: [], 
+        taskFileList: [],
       };
     },
     async openCreateDrawer() {
@@ -491,7 +498,8 @@ new Vue({
         taskDesc: data.taskDesc,
         taskContent: data.taskContent,
         taskTemplateId: data.taskTemplateId,
-        taskFileList: data.taskFileList,
+        taskAuditConfig: JSON.stringify(data.taskAuditConfig),
+        taskFileList: JSON.stringify(data.taskFileList),
       };
     },
     async doCreateItem() {
@@ -525,6 +533,8 @@ new Vue({
     // ---------- 修改数据 uiAction >>>>>>>>>>>> --------
     async prepareUpdateFormData(funObj) {
       this.updateItem = _.cloneDeep(funObj);
+      this.updateItem.taskAuditConfig = JSON.parse(this.updateItem.taskAuditConfig || '[]')
+      this.updateItem.taskFileList = JSON.parse(this.updateItem.taskFileList || '[]')
     },
     async openUpdateDrawer() {
       this.isUpdateDrawerShown = true;
@@ -548,7 +558,8 @@ new Vue({
         taskDesc: data.taskDesc,
         taskContent: data.taskContent,
         taskTemplateId: data.taskTemplateId,
-        taskFileList: data.taskFileList,
+        taskAuditConfig: JSON.stringify(data.taskAuditConfig),
+        taskFileList: JSON.stringify(data.taskFileList),
       };
     },
     async doUpdateItem() {
@@ -607,26 +618,20 @@ new Vue({
     },
     // ---------- <<<<<<<<<<< 删除数据 uiAction --------- 
     // ---------- Custom uiAction >>>>>>>>>>>> -------- 
-    async prepareUpdateFormData(funObj) {
-    funObj.taskAuditConfig = funObj.taskAuditConfig ? JSON.parse(funObj.taskAuditConfig) : []
-  
-    this.updateItem = _.cloneDeep(funObj);
-  }, 
-    async prepareCreateFormData() {
-    this.createItem = {
-    taskAuditConfig: []
-    };
-  }, 
-    prepareDoCreateItem() {
-    const {id, ...data} = this.createItem;
-    data.taskAuditConfig = JSON.stringify(data.taskAuditConfig)
-    this.createActionData = data;
-  }, 
-    async prepareDoUpdateItem() {
-    const {id, ...data} = this.updateItem;
-    this.updateItemId = id;
-    data.taskAuditConfig = JSON.stringify(data.taskAuditConfig)
-    this.updateActionData = data;
+    async getUserList() {
+    const rows = (
+    await window.jianghuAxios({
+    data: {
+      appData: {
+      pageId: 'ticketManagement',
+      actionId: 'getUserList',
+      actionData: {},
+      orderBy: [{ column: 'operationAt', order: 'desc' }],
+      },
+    },
+    })
+    ).data.appData.resultData.rows;
+    this.constantObj.member = rows;
   }, 
     async handleTaskTemplateChange({ taskTemplateId, item }) {
     const taskTemplate = this.constantObj.taskTemplate.find(item => item.taskTemplateId === taskTemplateId);

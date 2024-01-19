@@ -6,7 +6,7 @@
       添加审批人</v-btn>
 
     <div class="mt-2 todo-list">
-      <div v-for="(person, index) in personList" :key="index" class="todo-item d-flex align-center"
+      <div v-for="(person, index) in value" :key="index" class="todo-item d-flex align-center"
         style="border: 1px solid #eee">
         <v-text-field class="mr-2" hide-details hide-actions hide-controls
           v-model="person.position" dense single-line filled></v-text-field>
@@ -33,7 +33,7 @@
   Vue.component("task-approval-person-list", {
     template: '#task-approval-person-list',
     props: {
-      personList: {
+      value: {
         type: Array,
         default: () => [],
       },
@@ -57,12 +57,10 @@
     },
     methods: {
       addTodo() {
-        this.personList.push({ userId: '', position: `岗位${this.personList.length+1}` });
-        this.$emit('update:personList', this.personList)
+        this.value.push({ userId: '', position: `岗位${this.value.length+1}` });
       },
       deleteTodo(index) {
-        this.personList.splice(index, 1);
-        this.$emit('update:personList', this.personList)
+        this.value.splice(index, 1);
       },
       async getUserList() {
         const rows = (await window.jianghuAxios({

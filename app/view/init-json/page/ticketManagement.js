@@ -59,9 +59,22 @@ const content = {
         operation: 'select',
       },
     },
+    {
+      actionId: 'getUserList',
+      resourceType: 'sql',
+      resourceHook: {},
+      desc: '✅查询用户列表',
+      resourceData: {
+        table: '_view01_user',
+        operation: 'select',
+      },
+    },
   ], // 额外resource { actionId, resourceType, resourceData }
   drawerList: [], // 抽屉列表 { key, title, contentList }
-  includeList: [], // 其他资源引入
+  includeList: [
+    { type: 'include', path: 'component/task-attachment-list.html' },
+
+  ], // 其他资源引入
   common: {
     data: {
       constantObj: {
@@ -115,34 +128,30 @@ const content = {
     created() {
       this.doUiAction('getTableData');
       this.doUiAction('getTaskTemplate');
+      this.doUiAction('getUserList');
     },
     watch: {},
     computed: {},
     doUiAction: {
+      getUserList: ['getUserList'],
       getTaskTemplate: ['getTaskTemplate'],
       handleTaskTemplateChange: ['handleTaskTemplateChange'],
     }, // 额外uiAction { [key]: [action1, action2]}
     methods: {
-      async prepareUpdateFormData(funObj) {
-        funObj.taskAuditConfig = funObj.taskAuditConfig ? JSON.parse(funObj.taskAuditConfig) : []
-
-        this.updateItem = _.cloneDeep(funObj);
-      },
-      async prepareCreateFormData() {
-        this.createItem = {
-          taskAuditConfig: []
-        };
-      },
-      prepareDoCreateItem() {
-        const {id, ...data} = this.createItem;
-        data.taskAuditConfig = JSON.stringify(data.taskAuditConfig)
-        this.createActionData = data;
-      },
-      async prepareDoUpdateItem() {
-        const {id, ...data} = this.updateItem;
-        this.updateItemId = id;
-        data.taskAuditConfig = JSON.stringify(data.taskAuditConfig)
-        this.updateActionData = data;
+      async getUserList() {
+        const rows = (
+          await window.jianghuAxios({
+            data: {
+              appData: {
+                pageId: 'ticketManagement',
+                actionId: 'getUserList',
+                actionData: {},
+                orderBy: [{ column: 'operationAt', order: 'desc' }],
+              },
+            },
+          })
+        ).data.appData.resultData.rows;
+        this.constantObj.member = rows;
       },
       async handleTaskTemplateChange({ taskTemplateId, item }) {
         const taskTemplate = this.constantObj.taskTemplate.find(item => item.taskTemplateId === taskTemplateId);
@@ -172,12 +181,22 @@ const content = {
       {
         tag: 'v-select',
         model: 'serverSearchWhereLike.taskManagerId',
-        attrs: { prefix: '负责人', items: 'constantObj.member' },
+        attrs: {
+          prefix: '负责人',
+          ':items': 'constantObj.member',
+          'item-text': 'username',
+          'item-value': 'userId',
+        },
       },
       {
         tag: 'v-select',
         model: 'serverSearchWhere.taskMemberIdList',
-        attrs: { prefix: '参与人', items: 'constantObj.member' },
+        attrs: {
+          prefix: '参与人',
+          ':items': 'constantObj.member',
+          'item-text': 'username',
+          'item-value': 'userId',
+        },
       },
     ],
     serverSearchWhere: { taskType: '审批' },
@@ -211,6 +230,9 @@ const content = {
           bizId: 'taskId',
           startValue: 10001,
         },
+        colsAttrs: {
+          class: 'd-none'
+        }
       },
       {
         label: '审批名称',
@@ -236,8 +258,11 @@ const content = {
       },
       {
         label: '',
+        default: "[]",
         cols: 12,
         tag: 'v-col',
+        model: 'taskAuditConfig',
+        valueType: 'json',
         value: `
         <v-row v-for="item in createItem.taskAuditConfig">
           <v-col cols="2">
@@ -253,12 +278,18 @@ const content = {
         attrs: {
           'v-if': 'createItem.taskAuditConfig.length',
         },
+        default: '[]',
+        valueType: 'json',
       },
       {
         label: '附件列表',
-        model: 'taskFileList',
+        default: "[]",
         cols: 12,
-        tag: 'v-text-field',
+        model: 'taskFileList',
+        valueType: 'json',
+        tag: 'task-attachment-list',
+        default: '[]',
+        valueType: 'json',
       },
     ],
   },
@@ -295,6 +326,7 @@ const content = {
             label: '',
             cols: 12,
             tag: 'v-col',
+            model: 'taskAuditConfig',
             value: `
             <v-row v-for="item in updateItem.taskAuditConfig">
               <v-col cols="2">
@@ -310,12 +342,16 @@ const content = {
             attrs: {
               'v-if': 'updateItem.taskAuditConfig.length',
             },
+            default: '[]',
+            valueType: 'json',
           },
           {
             label: '附件列表',
-            model: 'taskFileList',
             cols: 12,
-            tag: 'v-text-field',
+            model: 'taskFileList',
+            tag: 'task-attachment-list',
+            default: '[]',
+            valueType: 'json',
           },
         ],
       },

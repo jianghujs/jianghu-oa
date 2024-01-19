@@ -10,7 +10,7 @@
 
 
     <v-card class="mt-2 todo-list">
-      <div v-for="(item, index) in files" :key="index" class="todo-item d-flex align-center"
+      <div v-for="(item, index) in value" :key="index" class="todo-item d-flex align-center"
         style="border: 1px solid #eee">
         <p class="ma-0 todo-item-text">{{ item.filename }}</p>
         <v-menu offset-y>
@@ -37,9 +37,9 @@
   Vue.component("task-attachment-list", {
     template: '#task-attachment-list',
     props: {
-      files: {
+      value: {
         type: Array,
-        default: () => [],
+        default: [],
       },
       // 是否只读
       readonly: {
@@ -53,8 +53,7 @@
     },
     methods: {
       deleteFile(index) {
-        this.files.splice(index, 1);
-        this.$emit('update:files', this.files)
+        this.value.splice(index, 1);
       },
       downloadFile(item) {
         const { downloadBasePath, downloadPath, filename } = item;
@@ -93,8 +92,7 @@
 
           if (result.data.status === 'success') {
             const item = result.data.appData.resultData
-            this.files.push(item);
-            this.$emit('update:files', this.files)
+            this.value.push(item);
           } else {
             await window.vtoast.fail("文件上传失败");
             throw new Error("文件上传失败");

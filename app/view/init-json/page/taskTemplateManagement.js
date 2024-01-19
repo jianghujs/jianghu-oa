@@ -47,7 +47,10 @@ const content = {
     },
   ], // 额外resource { actionId, resourceType, resourceData }
   drawerList: [], // 抽屉列表 { key, title, contentList }
-  includeList: [], // 其他资源引入
+  includeList: [
+    { type: 'include', path: 'component/task-approval-person-list.html' },
+
+  ], // 其他资源引入
   common: {
     data: {
       validationRules: {
@@ -79,6 +82,14 @@ const content = {
         type: 'v-text-field',
         width: 80,
         sortable: true,
+        idGenerate: {
+          prefix: 'RZ',
+          bizId: 'taskTemplateId',
+          startValue: 10001,
+        },
+        colsAttrs: {
+          class: 'd-none'
+        }
       },
       {
         text: '任务模板名称',
@@ -141,8 +152,10 @@ const content = {
         label: '审批人列表',
         cols: 12,
         model: 'taskTemplatePersonList',
-        tag: 'jh-json-table-editor',
+        tag: 'task-approval-person-list',
         rules: 'validationRules.requireRules',
+        default: '[]',
+        valueType: 'json',
       },
     ],
   },
@@ -169,8 +182,10 @@ const content = {
             label: '审批人列表',
             cols: 12,
             model: 'taskTemplatePersonList',
-            tag: 'jh-json-table-editor',
+            tag: 'task-approval-person-list',
             rules: 'validationRules.requireRules',
+            default: '[]',
+            valueType: 'json',
           },
         ],
       },
