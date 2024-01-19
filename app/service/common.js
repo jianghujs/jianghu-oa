@@ -1,6 +1,5 @@
 const Service = require('egg').Service;
 const validateUtil = require('@jianghujs/jianghu/app/common/validateUtil');
-const { BizError, errorInfoEnum } = require('../constant/error');
 const _ = require('lodash');
 
 
@@ -16,6 +15,14 @@ const actionDataScheme = Object.freeze({
       prefix: { anyOf: [{ type: "string" }, { type: "number" }, { type: "null" }] },
     },
   },
+  generateSpecIdOfBeforeHook: {
+    type: 'object',
+    additionalProperties: true,
+    required: [ 'productId' ],
+    properties: {
+      productId: { anyOf: [{ type: "string" }, { type: "number" }] },
+    },
+  },
 });
 class CommonService extends Service {
 
@@ -28,24 +35,41 @@ class CommonService extends Service {
     const startValue = bizIdGenerate.startValue || 1001;
 
     if (type === 'idSequence') {
-      let newIdSequence = null;
-      const newIdSequenceResult = await jianghuKnex(tableName, this.ctx)
-        .max('idSequence', { as: "newIdSequence" })
+      let newidSequence = null;
+      const newidSequenceResult = await jianghuKnex(tableName)
+        .max('idSequence', { as: "newidSequence" })
         .first();
-      if (!newIdSequenceResult.newIdSequence) {
-        newIdSequence = startValue
-      } if (newIdSequenceResult.newIdSequence < startValue) {
-        newIdSequence = startValue
+      if (!newidSequenceResult.newidSequence) {
+        newidSequence = startValue
+      } if (newidSequenceResult.newidSequence < startValue) {
+        newidSequence = startValue
       } else {
-        newIdSequence = parseInt(newIdSequenceResult.newIdSequence) + 1;
+        newidSequence = parseInt(newidSequenceResult.newidSequence) + 1;
       }
-      const newBizId = prefix+ newIdSequence;
-      this.ctx.request.body.appData.actionData.idSequence = newIdSequence;
+      const newBizId = prefix+ newidSequence;
+      this.ctx.request.body.appData.actionData.idSequence = newidSequence;
       this.ctx.request.body.appData.actionData[bizId] = newBizId;
     } else {
-      throw new BizError(errorInfoEnum.data_exception); 
+      throw new Error("不支持的type " + type);
     }
   }
+
+  async generateBizIdOfAfterHook() {
+    const bizIdGenerate = this.ctx.request.body.appData.bizIdGenerate;
+    validateUtil.validate(actionDataScheme.generateBizIdOfBeforeHook, bizIdGenerate, "BizId生成");
+    const { type, bizId } = bizIdGenerate;
+    if (type === 'idSequence') {
+      const idSequence = this.ctx.request.body.appData.actionData.idSequence;
+      const bizIdVaule = this.ctx.request.body.appData.actionData[bizId];
+      this.ctx.response.body.appData.resultData.idSequence = idSequence;
+      this.ctx.response.body.appData.resultData[bizId] = bizIdVaule;
+    } else {
+      throw new Error("不支持的type " + type);
+    }
+
+
+  }
+
 
 }
 

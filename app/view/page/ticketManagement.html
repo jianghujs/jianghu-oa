@@ -108,6 +108,10 @@
         <v-divider class="jh-divider"></v-divider>
         <v-row class="mt-0 px-4">
           <v-col cols="12" sm="12" md="4">
+            <span class="jh-input-label">审批Id</span> 
+            
+          </v-col>
+          <v-col cols="12" sm="12" md="4">
             <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>审批名称</span> 
             <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskTitle" :rules="validationRules.requireRules"></v-text-field>
           </v-col>
@@ -256,6 +260,7 @@
 {% endblock %}
 
 {% block vueScript %}
+{% include 'common/jianghuJs/fixedTableHeightV4.html' %}
 {% include 'component/tableRecordHistory.html' %}
 
 <script type="module">
@@ -481,6 +486,7 @@ new Vue({
     prepareDoCreateItem() {
       const {id, ...data} = this.createItem;
       this.createActionData = {
+        taskId: data.taskId,
         taskTitle: data.taskTitle,
         taskDesc: data.taskDesc,
         taskContent: data.taskContent,
@@ -496,6 +502,13 @@ new Vue({
           appData: {
             pageId: 'ticketManagement',
             actionId: 'insertItem',
+            bizIdGenerate: {
+              type: "idSequence",
+              prefix: "SP",
+              bizId: "taskId",
+              tableName: "task",
+              startValue: 10001,
+            },
             actionData: this.createActionData
           }
         }

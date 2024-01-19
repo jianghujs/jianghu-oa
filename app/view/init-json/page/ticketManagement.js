@@ -204,6 +204,15 @@ const content = {
   createDrawerContent: {
     formItemList: [
       {
+        label: '审批Id',
+        model: 'taskId',
+        idGenerate: {
+          prefix: 'SP',
+          bizId: 'taskId',
+          startValue: 10001,
+        },
+      },
+      {
         label: '审批名称',
         model: 'taskTitle',
         tag: 'v-text-field',

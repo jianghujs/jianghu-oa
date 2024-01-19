@@ -1,0 +1,577 @@
+<script type="text/html" id="student-of-class">
+<div>
+  <!-- 头部内容 >>>>>>>>>>>>> --> 
+  <div class="jh-page-second-bar px-4">
+    <v-row class="align-center" dense>
+      <v-col cols="12" xs="12" sm="12" md="4" xl="3">
+        <div class="py-4 text-body-1 font-weight-bold d-flex align-center">班级学生列表
+        </div>
+      </v-col>
+      <v-col cols="12" xs="12" sm="12" md="8" xl="9">
+        <v-row class="jh-backend-form-container justify-end ma-0 py-3"> 
+          <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pr-md-2">
+            <v-text-field v-model="serverSearchWhereLike.name" color="success" prefix="学生名字：" class="jh-v-input bg-white" dense filled single-line></v-text-field>
+          </v-col>
+          <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pr-md-2 pt-2 pt-sm-0">
+            <v-select v-model="serverSearchWhere.gender" color="success" prefix="性别：" class="jh-v-input bg-white" items="constantObj.gender" dense filled single-line></v-select>
+          </v-col>  
+          <div class="jh-backend-search-btn">
+            <v-btn class="elevation-0 float-right mt-2 mt-md-0" color="success" small @click="doUiAction('getTableData')">
+              查询
+            </v-btn>
+          </div>
+        </v-row>
+      </v-col>
+    </v-row>
+  </div>
+  <!-- <<<<<<<<<<<<< 头部内容 -->
+
+  <!-- 页面内容 >>>>>>>>>>>>> -->
+  <div class="jh-page-body-container px-4">
+    <v-card class="rounded-lg">
+      <v-row class="ma-0 pa-4">
+        <!-- 新增按钮 -->
+        <v-col cols="12" xs="8" sm="4" md="3" xl="2" class="pa-0">
+          <v-btn color="success" class="elevation-0 mr-2" @click="doUiAction('startCreateItem')" small>新增</v-btn>
+        </v-col>
+        <v-spacer></v-spacer>
+        <!-- 搜索过滤 -->
+        <v-col cols="12" xs="8" sm="4" md="3" xl="2" class="pa-0">
+          <v-text-field color="success" v-model="tableSearchInput" prefix="搜索：" class="jh-v-input" dense filled single-line></v-text-field>
+        </v-col>
+      </v-row>
+      <!-- 表格 -->
+      <v-data-table
+        :headers="tableHeaderList"
+        :items="tableData"
+        :search="tableSearchInput"
+        :footer-props="{ itemsPerPageOptions: [20, 50, 200, -1], itemsPerPageText: '每页', itemsPerPageAllText: '所有'}"
+        :items-per-page="-1"
+        mobile-breakpoint="0"
+        :loading="tableLoading"
+        checkbox-color="success"
+        :class="{'zebraLine': true }"
+        fixed-header
+        class="jh-fixed-table-height elevation-0 mt-0 mb-xs-4"
+      >
+        <template v-slot:item.dateOfBirth="{item, index}">
+          <v-icon></v-icon>{{dayjs(item.dateOfBirth).format("YYYY-MM")}}
+        </template>
+        <template v-slot:item.classId="{item, index}">
+          <v-chip color="success" small v-if="item.classId === '1'" @click="doUiAction('viewDetail', item)">
+            {{dayjs(item.dateOfBirth).format("YYYY-MM")}}
+          </v-chip>
+          <v-chip color="success" small @click="doUiAction('viewDetail', item)">
+            {{dayjs(item.dateOfBirth).format("YYYY-MM")}}
+          </v-chip>
+        </template>
+          
+        <!-- 表格操作按钮 -->
+        <template v-slot:item.action="{ item }">
+          <span role="button" class="success--text font-weight-medium font-size-2 mr-2" @click="doUiAction('startUpdateItem', item)">
+            <v-icon size="16" class="success--text">mdi-note-edit-outline</v-icon>详情
+          </span>
+          <span role="button" class="error--text font-weight-medium font-size-2" @click="doUiAction('deleteItem', item)">
+            <v-icon size="16" class="error--text">mdi-trash-can-outline</v-icon>删除
+          </span>
+        </template>
+        <!-- 没有数据 -->
+        <template v-slot:loading>
+          <div class="jh-no-data">数据加载中</div>
+        </template>
+        <template v-slot:no-data>
+          <div class="jh-no-data">暂无数据</div>
+        </template>
+        <template v-slot:no-results>
+          <div class="jh-no-data">暂无数据</div>
+        </template>
+        <!-- 表格分页 -->
+        <template v-slot:footer.page-text="pagination">
+          <span>{{pagination.pageStart}}-{{pagination.pageStop}}</span>
+          <span class="ml-1">共{{pagination.itemsLength}}条</span>
+        </template>
+      </v-data-table>
+    </v-card>
+  </div>
+  <!-- <<<<<<<<<<<<< 页面内容 -->
+
+  <!-- 新增抽屉 >>>>>>>>>>>>> --> 
+  <v-navigation-drawer v-if="isCreateDrawerShown" v-model="isCreateDrawerShown" :permanent="isCreateDrawerShown" fixed temporary right width="80%" class="elevation-24">
+    <v-form ref="createForm" lazy-validation>
+      <!-- 抽屉标题 -->
+      <v-row no-gutters>
+        <span class="text-h7 font-weight-bold pa-4">新增信息</span>
+      </v-row>
+      <v-row class="mt-0 px-4">
+        <v-col cols="12" sm="12" md="4">
+          <span class="jh-input-label">学生ID</span> 
+          <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.studentId" :rules="[]" :disabled="true"placeholder="规则自动生成"></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="12" md="4">
+          <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>学生名字</span> 
+          <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.name" :rules="validationRules.requireRules" ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="12" md="4">
+          <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>性别</span>
+          <v-select class="jh-v-input mr-2" dense filled single-line v-model="createItem.gender" :rules="[v => !!v || '此项必填',]" :items="constantObj.gender"></v-select>
+        </v-col>
+        <v-col cols="12" sm="12" md="4">
+          <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>出生日期</span> 
+          <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.dateOfBirth" :rules="validationRules.requireRules" ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="12" md="4">
+          <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>班级ID</span> 
+          <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.classId" :rules="validationRules.requireRules" ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="12" md="4">
+          <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>年级</span> 
+          <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.level" :rules="validationRules.requireRules" ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="12" md="4">
+          <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>身高</span> 
+          <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.bodyHeight" :rules="validationRules.requireRules" ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="12" md="4">
+          <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>学生状态</span> 
+          <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.studentStatus" :rules="validationRules.requireRules" ></v-text-field>
+        </v-col>
+        <v-col cols="12" sm="12" md="4">
+          <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>备注</span> 
+          <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.remarks" :rules="validationRules.requireRules" ></v-text-field>
+        </v-col>
+      </v-row>
+      <!-- 抽屉操作按钮 -->
+      <v-row class="justify-end mx-0 my-8 px-4">
+          <v-btn color="success" @click="doUiAction('createItem')" small>保存</v-btn>
+          <v-btn class="elevation-0 ml-2" @click="isCreateDrawerShown = false" small>取消</v-btn>
+      </v-row>
+    </v-form>
+    <!-- 抽屉关闭按钮 -->
+    <v-btn elevation="0" color="success" fab absolute top left small tile class="drawer-close-float-btn" @click="isCreateDrawerShown = false">
+      <v-icon>mdi-close</v-icon>
+    </v-btn>
+  </v-navigation-drawer>
+  <!-- <<<<<<<<<<<<< 新增抽屉 -->
+
+  <!-- 编辑抽屉 >>>>>>>>>>>>> --> 
+  <v-navigation-drawer v-if="isUpdateDrawerShown" v-model="isUpdateDrawerShown" :permanent="isUpdateDrawerShown" fixed temporary right width="80%" class="elevation-24">
+      <v-form ref="updateForm" lazy-validation>
+        <!-- 抽屉标题 -->
+        <v-row no-gutters>
+          <span class="text-h7 font-weight-bold pa-4">详细信息</span>
+        </v-row>
+        <v-divider class="jh-divider"></v-divider>
+        <div class="px-4">
+          <v-tabs
+            v-model="updateDrawerTab"
+            color="success"
+          >
+            <v-tab key="详细信息">
+              详细信息
+            </v-tab>
+            <v-tab key="操作记录">
+              操作记录
+            </v-tab>
+          </v-tabs>
+        </div>
+        <v-tabs-items v-model="updateDrawerTab">
+          <v-tab-item
+            key="详细信息"
+          > 
+            <v-row class="mt-0 px-4">
+              <v-col cols="12" sm="12" md="4">
+                <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>学生ID</span> 
+                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.studentId" :rules="validationRules.requireRules" ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="12" md="4">
+                <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>学生名字</span> 
+                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.name" :rules="[v => !!v || '此项必填',]" ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="12" md="4">
+                <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>性别</span>
+                <v-select class="jh-v-input mr-2" dense filled single-line v-model="updateItem.gender" :rules="validationRules.requireRules" :items="constantObj.gender"></v-select>
+              </v-col>
+              <v-col cols="12" sm="12" md="4">
+                <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>出生日期</span> 
+                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.dateOfBirth" :rules="validationRules.requireRules" ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="12" md="4">
+                <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>班级ID</span> 
+                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.classId" :rules="validationRules.requireRules" ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="12" md="4">
+                <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>年级</span> 
+                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.level" :rules="validationRules.requireRules" ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="12" md="4">
+                <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>身高</span> 
+                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.bodyHeight" :rules="validationRules.requireRules" ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="12" md="4">
+                <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>学生状态</span> 
+                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.studentStatus" :rules="validationRules.requireRules" ></v-text-field>
+              </v-col>
+              <v-col cols="12" sm="12" md="4">
+                <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>备注</span> 
+                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.remarks" :rules="validationRules.requireRules" ></v-text-field>
+              </v-col> 
+            </v-row>
+
+            <!-- 抽屉操作按钮 -->
+            <v-row class="justify-end mx-0 my-8 px-4">
+                <v-btn color="success" @click="doUiAction('updateItem')" small>保存</v-btn>
+                <v-btn class="elevation-0 ml-2" @click="isUpdateDrawerShown = false" small>取消</v-btn>
+            </v-row>
+          </v-tab-item>
+          <v-tab-item
+            key="操作记录"
+          >
+            <table-record-history v-bind="{'table': 'example_student','pageId': 'exampleClass','id': updateItem.id,}"/>
+          </v-tab-item>
+        </v-tabs-items>
+      </v-form>
+      <!-- 抽屉关闭按钮 -->
+      <v-btn elevation="0" color="success" fab absolute top left small tile class="drawer-close-float-btn" @click="isUpdateDrawerShown = false">
+        <v-icon>mdi-close</v-icon>
+      </v-btn>
+  </v-navigation-drawer>
+  <!-- <<<<<<<<<<<<< 编辑抽屉 -->
+</div>
+</script>
+{% include 'component/tableRecordHistory.html' %}
+<script>
+
+Vue.component("student-of-class", {
+  template: '#student-of-class',
+  vuetify: new Vuetify(),
+  props: {
+      classId: {
+        type: String,
+        required: true,
+        default: ""
+      }
+    },
+  data: () => ({
+    // ================================ common ================================ 
+    constantObj: {
+      gender: [
+        "全部",
+        "男",
+        "女"
+      ]
+    }, 
+    validationRules: {
+      requireRules: [
+        v => !!v || '此项必填'
+      ],
+      phoneRules: [
+        v => !!v || '此项必填',
+        v => /^1[3456789]d{9}$/.test(v) || '手机号格式错误'
+      ]
+    }, 
+    tableSelected: [],
+
+    // ================================ headContent ================================
+    breadcrumbList: [],
+    serverSearchWhere: {
+      gender: "全部"
+    },
+    serverSearchWhereLike: {
+      name: null,
+      dateOfBirth: null
+    },
+
+    // ================================ pageContent ================================
+    tableHeaderList: [
+      {text:"学生ID",value:"studentId",type:"v-text-field",width:80,sortable:true},
+      {text:"学生名字",value:"name",type:"v-text-field",width:80,sortable:true},
+      {text:"性别",value:"gender",type:"v-text-field",width:80,sortable:true},
+      {text:"出生日期",value:"dateOfBirth",type:"v-text-field",width:80,sortable:true},
+      {text:"班级ID",value:"classId",type:"v-text-field",width:80,sortable:true},
+      {text:"年级",value:"level",type:"v-text-field",width:80,sortable:true},
+      {text:"身高",value:"bodyHeight",type:"v-text-field",width:80,sortable:true},
+      {text:"学生状态",value:"studentStatus",type:"v-text-field",width:80,sortable:true},
+      {text:"备注",value:"remarks",type:"v-text-field",width:80,sortable:true},
+      {text:"操作",value:"action",type:"action",width:120,align:"center",class:"fixed",cellClass:"fixed"},
+    ],
+    tableData: [],
+    tableLoading: true,
+    tableSearchInput: null,
+
+    // ================================ createDrawerContent ================================
+    isCreateDrawerShown: false,
+    createItem: {},
+    createActionData: {},
+
+    // ================================ updateDrawerContent ================================
+    isUpdateDrawerShown: false,
+    updateItem: {},
+    updateItemId: null,
+    updateActionData: {},
+    updateDrawerTab: 0,
+
+    // ================================ deleteContent ================================
+    deleteItem: {},
+    deleteItemId: null,
+
+    // ================================ 其他抽屉列表 ================================
+  }),
+  watch: {
+      classId: {
+        immediate: true,
+        handler(val) {
+              this.doUiAction('getTableData');
+            }
+      }
+    },
+  
+  async created() {
+  },
+  async mounted() {
+  },
+  methods: {
+    async doUiAction(uiActionId, uiActionData) {
+      try {
+        switch (uiActionId) {
+          case 'getTableData':
+            await this.getTableData();
+            break;
+          case 'startCreateItem':
+            await this.prepareCreateFormData();
+            await this.openCreateDrawer();
+            break;
+          case 'createItem':
+            await this.prepareCreateValidate();
+            await this.confirmCreateItemDialog();
+            await this.prepareDoCreateItem();
+            await this.doCreateItem();
+            await this.closeCreateDrawer();
+            await this.getTableData();
+            break;
+          case 'startUpdateItem':
+            await this.prepareUpdateFormData(uiActionData);
+            await this.openUpdateDrawer();
+            break;
+          case 'updateItem':
+            await this.prepareUpdateValidate();
+            await this.confirmUpdateItemDialog();
+            await this.prepareDoUpdateItem();
+            await this.doUpdateItem();
+            await this.closeUpdateDrawer();
+            await this.getTableData();
+            break;
+          case 'deleteItem':
+            await this.prepareDeleteFormData(uiActionData);
+            await this.confirmDeleteItemDialog();
+            await this.prepareDoDeleteItem();
+            await this.doDeleteItem();
+            await this.clearDeleteItem();
+            await this.getTableData();
+            break;
+
+          default:
+            console.error("[doUiAction] uiActionId not find", {uiActionId});
+            break;
+        }
+      } catch (error) {
+        throw error;
+      } finally {
+        window.jhMask.hide();
+      }
+    },
+    // ---------- 获取表格数据 uiAction >>>>>>>>>> --------
+    async getTableData() {
+      this.tableLoading = true;
+      const where = {};
+      const whereLike = {};
+      for (const fieldKey in this.serverSearchWhere) {
+        const fieldValue = this.serverSearchWhere[fieldKey];
+        if(!!fieldValue && fieldValue != '全部') {
+          where[fieldKey] = fieldValue;
+        }
+      }
+      for (const fieldKey in this.serverSearchWhereLike) {
+        const fieldValue = this.serverSearchWhereLike[fieldKey];
+        if(!!fieldValue && fieldValue != '全部') {
+          whereLike[fieldKey] = fieldValue;
+        }
+      }
+      where.classId = this.classId;
+      const rows = (await window.jianghuAxios({
+        data: {
+          appData: {
+            pageId: 'exampleClass',
+            actionId: 'studentOfClass-selectItemList',
+            actionData: {},
+            where,
+            whereLike,
+            orderBy: [{column: 'operationAt', order: 'desc'}]
+          }
+        }
+      })).data.appData.resultData.rows;
+      this.tableData = rows;
+      this.tableLoading = false;
+    },
+    // ---------- <<<<<<<<<<< 获取表格数据 uiAction ---------
+
+    // ---------- 新增数据 uiAction >>>>>>>>>> --------
+    async prepareCreateFormData() {
+      this.createItem = { 
+        gender: '男',
+        classId: this.classId,
+      };
+    },
+    async openCreateDrawer() {
+      this.isCreateDrawerShown = true;
+    },
+    async prepareCreateValidate() {
+      if (await this.$refs.createForm.validate()) {
+        return true;
+      }
+      throw new Error("请完善表单信息")
+    },
+    async confirmCreateItemDialog() {
+      if (await window.confirmDialog({title: "新增", content: "确定新增吗？"}) === false) {
+        throw new Error("[confirmCreateFormDialog] 否");
+      }
+    },
+    prepareDoCreateItem() {
+      const {id, ...data} = this.createItem;
+      this.createActionData = {
+        studentId: data.studentId,
+        name: data.name,
+        gender: data.gender,
+        dateOfBirth: data.dateOfBirth,
+        classId: data.classId,
+        level: data.level,
+        bodyHeight: data.bodyHeight,
+        studentStatus: data.studentStatus,
+        remarks: data.remarks,
+      };
+    },
+    async doCreateItem() {
+      await window.jhMask.show();
+      await window.vtoast.loading("新增数据");
+      await window.jianghuAxios({
+        data: {
+          appData: {
+            pageId: 'exampleClass',
+            actionId: 'studentOfClass-insertItem',
+            bizIdGenerate: {
+              type: "idSequence",
+              prefix: "S",
+              bizId: "studentId",
+              tableName: "example_student",
+              startValue: 10001,
+            },
+            actionData: this.createActionData
+          }
+        }
+      })
+      await window.jhMask.hide();
+      await window.vtoast.success("新增数据成功");
+    },
+    async closeCreateDrawer() {
+      this.isCreateDrawerShown = false;
+      this.createItem = {};
+      this.createActionData = null;
+    },
+    // ---------- <<<<<<<<<<< 新增数据 uiAction ---------
+
+    // ---------- 修改数据 uiAction >>>>>>>>>>>> --------
+    async prepareUpdateFormData(funObj) {
+      this.updateItem = _.cloneDeep(funObj);
+    },
+    async openUpdateDrawer() {
+      this.isUpdateDrawerShown = true;
+    },
+    async prepareUpdateValidate() {
+      if (await this.$refs.updateForm.validate()) {
+        return true;
+      }
+      throw new Error("请完善表单信息")
+    },
+    async confirmUpdateItemDialog() {
+      if (await window.confirmDialog({title: "修改", content: "确定修改吗？"}) === false) {
+        throw new Error("[confirmUpdateItemDialog] 否");
+      }
+    },
+    async prepareDoUpdateItem() {
+      const {id, ...data} = this.updateItem;
+      this.updateItemId = id;
+      this.updateActionData = {
+        studentId: data.studentId,
+        name: data.name,
+        gender: data.gender,
+        dateOfBirth: data.dateOfBirth,
+        classId: data.classId,
+        level: data.level,
+        bodyHeight: data.bodyHeight,
+        studentStatus: data.studentStatus,
+        remarks: data.remarks,
+      };
+    },
+    async doUpdateItem() {
+      await window.jhMask.show();
+      await window.vtoast.loading("修改数据");
+      await window.jianghuAxios({
+        data: {
+          appData: {
+            pageId: 'exampleClass',
+            actionId: 'studentOfClass-updateItem',
+            actionData: this.updateActionData,
+            where: {id: this.updateItemId}
+          }
+        }
+      })
+      await window.jhMask.hide();
+      await window.vtoast.success("修改数据成功");
+    },
+    async closeUpdateDrawer() {
+      this.isUpdateDrawerShown = false;
+      this.updateItem = {};
+      this.updateActionData = null;
+      this.updateItemId = null;
+    },
+    // ---------- <<<<<<<<<<< 修改数据 uiAction ---------
+    
+    // ---------- 删除数据 uiAction >>>>>>>>>>>> --------
+    async prepareDeleteFormData(funObj) {
+      this.deleteItem = _.cloneDeep(funObj);
+    },
+    async confirmDeleteItemDialog() {
+      if (await window.confirmDialog({title: "删除", content: "确定删除吗？"}) === false) {
+        throw new Error("[confirmDeleteItemDialog] 否");
+      }
+    },
+    async prepareDoDeleteItem() {
+      const {id} = this.deleteItem;
+      this.deleteItemId = id;
+    },
+    async doDeleteItem() {
+      await window.vtoast.loading("删除数据");
+      await window.jianghuAxios({
+        data: {
+          appData: {
+            pageId: 'exampleClass',
+            actionId: 'studentOfClass-deleteItem',
+            actionData: {},
+            where: {id: this.deleteItemId}
+          }
+        }
+      });
+      await window.vtoast.success("删除数据成功");
+    },
+    async clearDeleteItem() {
+      this.deleteItem = {};
+      this.deleteItemId = null;
+    },
+    // ---------- <<<<<<<<<<< 删除数据 uiAction ---------
+
+    // ---------- 抽屉列表 uiAction >>>>>>>>>>>> --------
+  }
+})
+</script>
+
+<style scoped>
+</style>

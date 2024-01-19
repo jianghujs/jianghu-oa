@@ -3,11 +3,7 @@ const content = {
   pageId: 'journalManagement',
   table: 'task',
   pageName: '日志管理',
-  idGenerate: {
-    prefix: 'RZ',
-    bizId: 'taskId',
-    startValue: 10001,
-  },
+  
   resourceList: [
     {
       actionId: 'selectItemList',
@@ -140,6 +136,15 @@ const content = {
   },
   createDrawerContent: {
     formItemList: [
+      {
+        label: '日志Id',
+        model: 'taskId',
+        idGenerate: {
+          prefix: 'RZ',
+          bizId: 'taskId',
+          startValue: 10001,
+        },
+      },
       {
         label: '日志名称',
         model: 'taskTitle',

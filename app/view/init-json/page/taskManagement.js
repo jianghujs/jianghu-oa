@@ -3,11 +3,7 @@ const content = {
   pageId: 'taskManagement',
   table: 'task',
   pageName: '任务管理',
-  idGenerate: {
-    prefix: 'RW',
-    bizId: 'taskId',
-    startValue: 10001,
-  },
+
   resourceList: [
     {
       actionId: 'selectItemList',
@@ -156,6 +152,15 @@ const content = {
   },
   createDrawerContent: {
     formItemList: [
+      {
+        label: '任务Id',
+        model: 'taskId',
+        idGenerate: {
+          prefix: 'RW',
+          bizId: 'taskId',
+          startValue: 10001,
+        },
+      },
       {
         label: '任务名称',
         model: 'taskTitle',
