@@ -49,12 +49,23 @@ const content = {
         operation: 'jhDelete',
       },
     },
+    {
+      actionId: 'getTaskTemplate',
+      resourceType: 'sql',
+      resourceHook: {},
+      desc: '✅task模板查询',
+      resourceData: {
+        table: 'task_template',
+        operation: 'select',
+      },
+    },
   ], // 额外resource { actionId, resourceType, resourceData }
   drawerList: [], // 抽屉列表 { key, title, contentList }
   includeList: [], // 其他资源引入
   common: {
     data: {
       constantObj: {
+        taskTemplate: [],
         member: [],
         taskStatus: [
           {
@@ -96,14 +107,64 @@ const content = {
           },
         ],
       },
+      createItem: {},
       validationRules: {
         requireRules: [(v) => !!v || '必填'],
       },
     },
+    created() {
+      this.doUiAction('getTableData');
+      this.doUiAction('getTaskTemplate');
+    },
     watch: {},
     computed: {},
-    doUiAction: {}, // 额外uiAction { [key]: [action1, action2]}
-    methods: {},
+    doUiAction: {
+      getTaskTemplate: ['getTaskTemplate'],
+      handleTaskTemplateChange: ['handleTaskTemplateChange'],
+    }, // 额外uiAction { [key]: [action1, action2]}
+    methods: {
+      async prepareUpdateFormData(funObj) {
+        funObj.taskAuditConfig = funObj.taskAuditConfig ? JSON.parse(funObj.taskAuditConfig) : []
+
+        this.updateItem = _.cloneDeep(funObj);
+      },
+      async prepareCreateFormData() {
+        this.createItem = {
+          taskAuditConfig: []
+        };
+      },
+      prepareDoCreateItem() {
+        const {id, ...data} = this.createItem;
+        data.taskAuditConfig = JSON.stringify(data.taskAuditConfig)
+        this.createActionData = data;
+      },
+      async prepareDoUpdateItem() {
+        const {id, ...data} = this.updateItem;
+        this.updateItemId = id;
+        data.taskAuditConfig = JSON.stringify(data.taskAuditConfig)
+        this.updateActionData = data;
+      },
+      async handleTaskTemplateChange({ taskTemplateId, item }) {
+        const taskTemplate = this.constantObj.taskTemplate.find(item => item.taskTemplateId === taskTemplateId);
+        item.taskAuditConfig = JSON.parse(taskTemplate.taskTemplatePersonList);
+      },
+
+      async getTaskTemplate() {
+        const rows = (
+          await window.jianghuAxios({
+            data: {
+              appData: {
+                pageId: 'ticketManagement',
+                actionId: 'getTaskTemplate',
+                actionData: {},
+                orderBy: [{ column: 'operationAt', order: 'desc' }],
+              },
+            },
+          })
+        ).data.appData.resultData.rows;
+        this.constantObj.taskTemplate = rows;
+      },
+    },
   },
   headContent: {
     helpDrawer: {}, // 自动初始化md文件
@@ -118,7 +179,6 @@ const content = {
         model: 'serverSearchWhere.taskMemberIdList',
         attrs: { prefix: '参与人', items: 'constantObj.member' },
       },
-     
     ],
     serverSearchWhere: { taskType: '审批' },
     serverSearchWhereLike: {
@@ -138,27 +198,57 @@ const content = {
       { text: '负责人', value: 'taskManagerId', width: 120 },
       { text: '操作者', value: 'operationByUser', width: 120 },
       { text: '操作时间', value: 'operationAt', width: 250 },
+      { text: '操作', value: 'action', width: 120 },
     ],
   },
   createDrawerContent: {
     formItemList: [
       {
-        label: '任务名称',
+        label: '审批名称',
         model: 'taskTitle',
         tag: 'v-text-field',
         required: true,
         rules: 'validationRules.requireRules',
       },
-      { label: '任务描述', model: 'taskDesc', tag: 'v-text-field' },
-      { label: '任务优先级', model: 'taskLevel', tag: 'v-autocomplete', attrs: {':items': 'constantObj.taskLevel'} },
-      { label: '任务标签', model: 'taskTag', tag: 'v-text-field' },
-      { label: '任务开始时间', model: 'taskStartAt', tag: 'v-date-picker' },
-      { label: '任务结束时间', model: 'taskEndAt', tag: 'v-date-picker' },
-      { label: '负责人id', model: 'taskManagerId', tag: 'v-text-field' },
-      { label: '参与人id', model: 'taskMemberIdList', tag: 'v-text-field' },
+      { label: '审批描述', model: 'taskDesc', tag: 'v-text-field' },
+      { label: '审批内容', model: 'taskContent', cols: 12, tag: 'v-textarea' },
       {
-        label: '任务关联的附件列表',
+        label: '审批模板',
+        model: 'taskTemplateId',
+        tag: 'v-select',
+        required: true,
+        rules: 'validationRules.requireRules',
+        attrs: {
+          ':items': 'constantObj.taskTemplate',
+          'item-text': 'taskTemplateName',
+          'item-value': 'taskTemplateId',
+          '@change': "doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: createItem})"
+        },
+      },
+      {
+        label: '',
+        cols: 12,
+        tag: 'v-col',
+        value: `
+        <v-row v-for="item in createItem.taskAuditConfig">
+          <v-col cols="2">
+            <v-text-field hide-actions hide-controls hide-details class="jh-v-input " dense filled single-line v-model="item.position"
+              disabled></v-text-field>
+          </v-col>
+          <v-col cols="4">
+            <v-autocomplete hide-actions hide-controls hide-details :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input mr-2" dense
+              filled single-line :rules="validationRules.requireRules" v-model="item.userId" disabled>
+            </v-autocomplete>
+          </v-row>
+        `,
+        attrs: {
+          'v-if': 'createItem.taskAuditConfig.length',
+        },
+      },
+      {
+        label: '附件列表',
         model: 'taskFileList',
+        cols: 12,
         tag: 'v-text-field',
       },
     ],
@@ -171,22 +261,51 @@ const content = {
         type: 'form',
         formItemList: [
           {
-            label: '任务名称',
+            label: '审批名称',
             model: 'taskTitle',
             tag: 'v-text-field',
             required: true,
             rules: 'validationRules.requireRules',
           },
-          { label: '任务描述', model: 'taskDesc', tag: 'v-text-field' },
-          { label: '任务优先级', model: 'taskLevel', tag: 'v-autocomplete', attrs: {':items': 'constantObj.taskLevel'} },
-          { label: '任务标签', model: 'taskTag', tag: 'v-text-field' },
-          { label: '任务开始时间', model: 'taskStartAt', tag: 'v-text-field' },
-          { label: '任务结束时间', model: 'taskEndAt', tag: 'v-text-field' },
-          { label: '负责人id', model: 'taskManagerId', tag: 'v-text-field' },
-          { label: '参与人id', model: 'taskMemberIdList', tag: 'v-text-field' },
+          { label: '审批描述', model: 'taskDesc', tag: 'v-text-field' },
+          { label: '审批内容', model: 'taskContent', cols: 12, tag: 'v-textarea' },
           {
-            label: '任务关联的附件列表',
+            label: '审批模板',
+            model: 'taskTemplateId',
+            tag: 'v-select',
+            required: true,
+            rules: 'validationRules.requireRules',
+            attrs: {
+              ':items': 'constantObj.taskTemplate',
+              'item-text': 'taskTemplateName',
+              'item-value': 'taskTemplateId',
+              '@change': "doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: updateItem})"
+            },
+          },
+          {
+            label: '',
+            cols: 12,
+            tag: 'v-col',
+            value: `
+            <v-row v-for="item in updateItem.taskAuditConfig">
+              <v-col cols="2">
+                <v-text-field hide-actions hide-controls hide-details class="jh-v-input " dense filled single-line v-model="item.position"
+                  disabled></v-text-field>
+              </v-col>
+              <v-col cols="4">
+                <v-autocomplete hide-actions hide-controls hide-details :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input mr-2" dense
+                  filled single-line :rules="validationRules.requireRules" v-model="item.userId" disabled>
+                </v-autocomplete>
+              </v-row>
+            `,
+            attrs: {
+              'v-if': 'updateItem.taskAuditConfig.length',
+            },
+          },
+          {
+            label: '附件列表',
             model: 'taskFileList',
+            cols: 12,
             tag: 'v-text-field',
           },
         ],
