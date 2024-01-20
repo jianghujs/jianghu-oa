@@ -124,19 +124,19 @@
         </v-row>
         <v-divider class="jh-divider"></v-divider>
         <v-row class="mt-0 px-4">
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" class="d-none">
             <span class="jh-input-label">任务模板Id</span> 
             <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskTemplateId" :rules="validationRules.requireRules"></v-text-field>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label">任务模板名称</span> 
             <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskTemplateName" :rules="validationRules.requireRules"></v-text-field>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label">任务模板icon</span> 
             <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskTemplateIcon" :rules="validationRules.requireRules"></v-text-field>
           </v-col>
-          <v-col cols="12" sm="12" md="12">
+          <v-col cols="12" sm="12" md="12" >
             <span class="jh-input-label">审批人列表</span> 
             <task-approval-person-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="createItem.taskTemplatePersonList" :rules="validationRules.requireRules"></task-approval-person-list>
           </v-col>
@@ -257,7 +257,7 @@ new Vue({
     isHelpPageDrawerLoaded: false,
     // ================================ pageContent ================================
     headers: [
-      { text: "任务模板ID", value: "taskTemplateId", type: "v-text-field", width: 80, sortable: true, idGenerate: { prefix: "RZ", bizId: "taskTemplateId", startValue: 10001 }, colsAttrs: { class: "d-none" } },
+      { text: "任务模板ID", value: "taskTemplateId", type: "v-text-field", width: 80, sortable: true },
       { text: "任务模板名称", value: "taskTemplateName", type: "v-text-field", width: 80, sortable: true },
       { text: "创建时间", value: "taskTemplateCreateAt", type: "v-text-field", width: 80, sortable: true },
       { text: "操作者用户名", value: "operationByUser", type: "v-text-field", width: 80, sortable: true },

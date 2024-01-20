@@ -130,23 +130,29 @@
         </v-row>
         <v-divider class="jh-divider"></v-divider>
         <v-row class="mt-0 px-4">
-          <v-col cols="12" sm="12" md="4"class="d-none">
+          <v-col cols="12" sm="12" md="4" class="d-none">
             <span class="jh-input-label">日志Id</span> 
             
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" class="d-none"> 
+            
+          </v-col>
+          <v-col cols="12" sm="12" md="4" class="d-none"> 
+            
+          </v-col>
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>日志名称</span> 
             <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskTitle" :rules="validationRules.requireRules"></v-text-field>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label">发给谁</span> 
             <v-autocomplete :items="constantObj.taskTemplate" item-text="taskTemplateName" item-value="taskTemplateId" class="jh-v-input" dense single-line filled v-model="createItem.taskMemberIdList"></v-autocomplete>
           </v-col>
-          <v-col cols="12" sm="12" md="12">
+          <v-col cols="12" sm="12" md="12" >
             <span class="jh-input-label">日志内容</span> 
             <v-textarea class="jh-v-input" dense single-line filled v-model="createItem.taskContent"></v-textarea>
           </v-col>
-          <v-col cols="12" sm="12" md="12">
+          <v-col cols="12" sm="12" md="12" >
             <span class="jh-input-label">附件列表</span> 
             <task-attachment-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="createItem.taskFileList"></task-attachment-list>
           </v-col>
@@ -415,6 +421,8 @@ new Vue({
     // ---------- 新增数据 uiAction >>>>>>>>>> --------
     async prepareCreateFormData() {
       this.createItem = { 
+        taskCreateAt: dayjs().format('YYYY-MM-DD hh:mm:ss'), 
+        taskManagerId: window.userInfo.userId, 
         taskFileList: [],
       };
     },
@@ -436,6 +444,8 @@ new Vue({
       const {id, ...data} = this.createItem;
       this.createActionData = {
         taskId: data.taskId,
+        taskCreateAt: data.taskCreateAt,
+        taskManagerId: data.taskManagerId,
         taskTitle: data.taskTitle,
         taskMemberIdList: data.taskMemberIdList,
         taskContent: data.taskContent,

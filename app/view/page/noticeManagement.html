@@ -15,7 +15,7 @@
     <div class="jh-page-second-bar px-8">
       <v-row class="align-center" dense>
         <v-col cols="12" xs="12" sm="12" md="4" xl="3">
-          <div class="py-4 text-body-1 font-weight-bold d-flex align-center">通知管理 
+          <div class="py-4 text-body-1 font-weight-bold d-flex align-center">通知 
             <!-- 帮助页按钮 -->
             <span role="button" class="success--text font-weight-regular jh-font-size-13 ml-2" @click="isHelpPageDrawerShown = true">
               <v-icon size="13" class="success--text">mdi-help-circle-outline</v-icon>帮助
@@ -147,28 +147,28 @@
         </v-row>
         <v-divider class="jh-divider"></v-divider>
         <v-row class="mt-0 px-4">
-          <v-col cols="12" sm="12" md="4"class="d-none">
+          <v-col cols="12" sm="12" md="4" class="d-none">
             <span class="jh-input-label">通知Id</span> 
             
           </v-col>
-          <v-col cols="12" sm="12" md="4"class="d-none"> 
+          <v-col cols="12" sm="12" md="4" class="d-none"> 
             
           </v-col>
-          <v-col cols="12" sm="12" md="4"class="d-none"> 
+          <v-col cols="12" sm="12" md="4" class="d-none"> 
             
           </v-col>
-          <v-col cols="12" sm="12" md="4"class="d-none"> 
+          <v-col cols="12" sm="12" md="4" class="d-none"> 
             
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>公告名称</span> 
             <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskTitle" :rules="validationRules.requireRules"></v-text-field>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>通知范围</span> 
             <v-select :items="memberList" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="createItem.taskMemberIdList" :rules="validationRules.requireRules"></v-select>
           </v-col>
-          <v-col cols="12" sm="12" md="12">
+          <v-col cols="12" sm="12" md="12" >
             <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>公告内容</span> 
             <v-textarea class="jh-v-input" dense single-line filled v-model="createItem.taskContent" :rules="validationRules.requireRules"></v-textarea>
           </v-col>

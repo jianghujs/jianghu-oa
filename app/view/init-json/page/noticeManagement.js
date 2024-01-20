@@ -2,7 +2,7 @@ const content = {
   pageType: 'jh-page',
   pageId: 'noticeManagement',
   table: 'task',
-  pageName: '通知管理',
+  pageName: '通知',
 
   resourceList: [
     {

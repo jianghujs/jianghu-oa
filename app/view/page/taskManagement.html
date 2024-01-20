@@ -165,27 +165,33 @@
         </v-row>
         <v-divider class="jh-divider"></v-divider>
         <v-row class="mt-0 px-4">
-          <v-col cols="12" sm="12" md="4"class="d-none">
+          <v-col cols="12" sm="12" md="4" class="d-none">
             <span class="jh-input-label">任务Id</span> 
             
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" class="d-none"> 
+            
+          </v-col>
+          <v-col cols="12" sm="12" md="4" class="d-none"> 
+            
+          </v-col>
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>任务名称</span> 
             <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskTitle" :rules="validationRules.requireRules"></v-text-field>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label">任务描述</span> 
             <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskDesc"></v-text-field>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label">任务优先级</span> 
             <v-autocomplete :items="constantObj.taskLevel" class="jh-v-input" dense single-line filled v-model="createItem.taskLevel"></v-autocomplete>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label">任务标签</span> 
             <v-combobox :multiple="true" class="jh-v-input" dense single-line filled v-model="createItem.taskTag"></v-combobox>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label">任务开始时间</span> 
             <v-menu class="jh-v-input" transition="scale-transition" offset-y min-width="auto">
                 <template v-slot:activator="{on, attrs}">
@@ -194,7 +200,7 @@
                 <v-date-picker color="success" elevation="20" v-model="createItem.taskStartAt"></v-date-picker>
             </v-menu>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label">任务结束时间</span> 
             <v-menu class="jh-v-input" transition="scale-transition" offset-y min-width="auto">
                 <template v-slot:activator="{on, attrs}">
@@ -203,19 +209,19 @@
                 <v-date-picker color="success" elevation="20" v-model="createItem.taskEndAt"></v-date-picker>
             </v-menu>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label">负责人id</span> 
             <v-autocomplete :items="memberList" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="createItem.taskManagerId"></v-autocomplete>
           </v-col>
-          <v-col cols="12" sm="12" md="4">
+          <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label">参与人id</span> 
             <v-autocomplete :items="memberList" item-text="username" item-value="userId" :multiple="true" class="jh-v-input" dense single-line filled v-model="createItem.taskMemberIdList"></v-autocomplete>
           </v-col>
-          <v-col cols="12" sm="12" md="12">
+          <v-col cols="12" sm="12" md="12" >
             <span class="jh-input-label">子任务</span> 
             <task-child-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="createItem.taskChildList"></task-child-list>
           </v-col>
-          <v-col cols="12" sm="12" md="12">
+          <v-col cols="12" sm="12" md="12" >
             <span class="jh-input-label">附件列表</span> 
             <task-attachment-list class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="createItem.taskFileList"></task-attachment-list>
           </v-col>
@@ -530,6 +536,8 @@ new Vue({
     // ---------- 新增数据 uiAction >>>>>>>>>> --------
     async prepareCreateFormData() {
       this.createItem = { 
+        taskCreateAt: dayjs().format('YYYY-MM-DD hh:mm:ss'), 
+        taskManagerId: window.userInfo.userId, 
         taskChildList: [], 
         taskFileList: [],
       };
@@ -552,6 +560,8 @@ new Vue({
       const {id, ...data} = this.createItem;
       this.createActionData = {
         taskId: data.taskId,
+        taskCreateAt: data.taskCreateAt,
+        taskManagerId: data.taskManagerId,
         taskTitle: data.taskTitle,
         taskDesc: data.taskDesc,
         taskLevel: data.taskLevel,

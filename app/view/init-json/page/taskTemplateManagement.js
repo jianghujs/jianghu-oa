@@ -83,14 +83,7 @@ const content = {
         type: 'v-text-field',
         width: 80,
         sortable: true,
-        idGenerate: {
-          prefix: 'RZ',
-          bizId: 'taskTemplateId',
-          startValue: 10001,
-        },
-        colsAttrs: {
-          class: 'd-none'
-        }
+        
       },
       {
         text: '任务模板名称',
@@ -136,6 +129,9 @@ const content = {
           bizId: 'taskTemplateId',
           startValue: 10001,
         },
+        colsAttrs: {
+          class: 'd-none'
+        }
       },
       {
         label: '任务模板名称',
