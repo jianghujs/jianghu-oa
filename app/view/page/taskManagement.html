@@ -66,18 +66,18 @@
           <v-spacer></v-spacer>
           <!-- 搜索过滤 -->
           <v-col cols="12" xs="8" sm="4" md="3" xl="2" class="pa-0">
-            <v-text-field color="success" v-model="tableSearchInput" prefix="搜索：" class="jh-v-input" dense filled single-line></v-text-field>
+            <v-text-field color="success" v-model="searchInput" prefix="搜索：" class="jh-v-input" dense filled single-line></v-text-field>
           </v-col>
         </v-row>
         <!-- 表格 -->
         <v-data-table
-          :headers="tableHeaderList"
+          :headers="headers"
           :items="tableData"
-          :search="tableSearchInput"
+          :search="searchInput"
           :footer-props="{ itemsPerPageOptions: [20, 50, 200, -1], itemsPerPageText: '每页', itemsPerPageAllText: '所有'}"
           :items-per-page="-1"
           mobile-breakpoint="0"
-          :loading="tableLoading"
+          :loading="isTableLoading"
           checkbox-color="success"
           :class="{'zebraLine': true }"
           fixed-header
@@ -107,12 +107,35 @@
             
           <!-- 表格操作按钮 -->
           <template v-slot:item.action="{ item }">
-            <span role="button" class="success--text font-weight-medium font-size-2 mr-2" @click="doUiAction('startUpdateItem', item)">
-              <v-icon size="16" class="success--text">mdi-note-edit-outline</v-icon>详情
-            </span>
-            <span role="button" class="error--text font-weight-medium font-size-2" @click="doUiAction('deleteItem', item)">
-              <v-icon size="16" class="error--text">mdi-trash-can-outline</v-icon>删除
-            </span>
+
+            <template>
+              <!-- pc端 -->
+              <template v-if="!isMobile">
+                <span role="button" class="success--text font-weight-medium font-size-2 mr-2" @click="doUiAction('startUpdateItem', item)">
+                  <v-icon size="16" class="success--text">mdi-note-edit-outline</v-icon>详情
+                </span>
+                <span role="button" class="error--text font-weight-medium font-size-2" @click="doUiAction('deleteItem', item)">
+                  <v-icon size="16" class="error--text">mdi-trash-can-outline</v-icon>删除
+                </span>
+              </template>
+              <!-- 手机端 -->
+              <v-menu offset-y v-if="isMobile">
+                <template v-slot:activator="{ on, attrs }">
+                  <span role="button" class="success--text font-weight-medium font-size-2"
+                    v-bind="attrs" v-on="on">
+                    操作<v-icon size="14" class="success--text">mdi-chevron-down</v-icon>
+                  </span>
+                </template>
+                <v-list dense>
+                  <v-list-item @click="doUiAction('startUpdateItem', item)">
+                    <v-list-item-title><v-icon size="16" class="error--text">mdi-trash-can-outline</v-icon>删除</v-list-item-title>
+                  </v-list-item>
+                  <v-list-item @click="doUiAction('deleteItem', item)">
+                    <v-list-item-title>删除</v-list-item-title>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </template>
           </template>
           <!-- 没有数据 -->
           <template v-slot:loading>
@@ -402,20 +425,20 @@ new Vue({
     isHelpPageDrawerShown: false,
     isHelpPageDrawerLoaded: false,
     // ================================ pageContent ================================
-    tableHeaderList: [
-      {text:"任务名称",value:"taskTitle",width:200},
-      {text:"优先级",value:"taskLevel",width:120},
-      {text:"任务状态",value:"taskStatus",width:120},
-      {text:"开始时间",value:"taskStartAt",width:120},
-      {text:"结束时间",value:"taskEndAt",width:120},
-      {text:"负责人",value:"taskManagerId",width:120},
-      {text:"操作者",value:"operationByUser",width:120},
-      {text:"操作时间",value:"operationAt",width:250},
-      {text:"操作",value:"action",width:120},
+    headers: [
+      { text: "任务名称", value: "taskTitle", width: 200 },
+      { text: "优先级", value: "taskLevel", width: 120 },
+      { text: "任务状态", value: "taskStatus", width: 120 },
+      { text: "开始时间", value: "taskStartAt", width: 120 },
+      { text: "结束时间", value: "taskEndAt", width: 120 },
+      { text: "负责人", value: "taskManagerId", width: 120 },
+      { text: "操作者", value: "operationByUser", width: 120 },
+      { text: "操作时间", value: "operationAt", width: 250 },
+      { text: "操作", value: "action", width: 120 },
     ],
     tableData: [],
-    tableLoading: true,
-    tableSearchInput: null,
+    isTableLoading: true,
+    searchInput: null,
     // ================================ createDrawerContent ================================
     isCreateDrawerShown: false,
     createItem: {},
@@ -442,8 +465,8 @@ new Vue({
   computed: {},
 
   created() {
-  this.doUiAction('getTableData');
-  this.doUiAction('getUserList');
+    this.doUiAction('getTableData');
+    this.doUiAction('getUserList');
   },
   methods: {
     async doUiAction(uiActionId, uiActionData) {
@@ -504,7 +527,7 @@ new Vue({
     },
     // ---------- 获取表格数据 uiAction >>>>>>>>>> --------
     async getTableData() {
-      this.tableLoading = true;
+      this.isTableLoading = true;
       const where = {};
       const whereLike = {};
       for (const fieldKey in this.serverSearchWhere) {
@@ -532,8 +555,14 @@ new Vue({
           }
         }
       })).data.appData.resultData.rows;
-      this.tableData = rows;
-      this.tableLoading = false;
+      this.tableData = this.formatTableData(rows);
+      this.isTableLoading = false;
+    },
+    formatTableData(rows) {
+      rows.forEach(row => {
+        row.operationAt = row.operationAt ? dayjs(row.operationAt).format('YYYY-MM-DD HH:mm:ss') : '';
+      });
+      return rows;
     },
     // ---------- <<<<<<<<<<< 获取表格数据 uiAction ---------
     // ---------- 新增数据 uiAction >>>>>>>>>> --------
@@ -695,35 +724,35 @@ new Vue({
     // ---------- <<<<<<<<<<< 删除数据 uiAction --------- 
     // ---------- Custom uiAction >>>>>>>>>>>> -------- 
     async updateTaskItem({id, data}) {
-    await window.jhMask.show();
+      await window.jhMask.show();
   
-    await window.jianghuAxios({
-    data: {
-    appData: {
-      pageId: 'taskManagement',
-      actionId: 'updateItem',
-      actionData: data,
-      where: {id}
-    }
-    }
-    })
-    await window.jhMask.hide();
-  }, 
+      await window.jianghuAxios({
+        data: {
+          appData: {
+            pageId: 'taskManagement',
+            actionId: 'updateItem',
+            actionData: data,
+            where: {id}
+          }
+        }
+      })
+      await window.jhMask.hide();
+    }, 
     async getUserList() {
-    const rows = (
-    await window.jianghuAxios({
-    data: {
-      appData: {
-      pageId: 'taskManagement',
-      actionId: 'getUserList',
-      actionData: {},
-      orderBy: [{ column: 'operationAt', order: 'desc' }],
-      },
+      const rows = (
+        await window.jianghuAxios({
+          data: {
+            appData: {
+              pageId: 'taskManagement',
+              actionId: 'getUserList',
+              actionData: {},
+              orderBy: [{ column: 'operationAt', order: 'desc' }],
+            },
+          },
+        })
+      ).data.appData.resultData.rows;
+      this.constantObj.member = rows;
     },
-    })
-    ).data.appData.resultData.rows;
-    this.constantObj.member = rows;
-  },
     // ---------- <<<<<<<<<<< Custom uiAction ---------
   }
 })

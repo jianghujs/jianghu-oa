@@ -1,22 +1,71 @@
 <script>
-  const constantObj = {
-    noticeType: [
-      {
-        "text": "公告",
-        "value": "TZ"
+  var constantObj = {
+    taskReadStatus: [
+    {
+        text: '已读',
+        value: '是',
       },
       {
-        "text": "任务",
-        "value": "RW"
+        text: '未读',
+        value: '否',
+      },
+    ],
+    taskType: [
+      {
+        text: '公告',
+        value: 'TZ',
       },
       {
-        "text": "审批",
-        "value": "SP"
+        text: '任务',
+        value: 'RW',
       },
       {
-        "text": "日志",
-        "value": "RZ"
-      }
-    ]
-  }
+        text: '审批',
+        value: 'SP',
+      },
+      {
+        text: '日志',
+        value: 'RZ',
+      },
+    ],
+    taskStatus: [
+      {
+        text: '未开始',
+        value: '未开始',
+        color: 'blue',
+      },
+      {
+        text: '进行中',
+        value: '进行中',
+        color: 'orange',
+      },
+      {
+        text: '已完成',
+        value: '已完成',
+        color: 'grey',
+      },
+    ],
+    taskLevel: [
+      {
+        text: '无',
+        value: '无',
+        color: 'grey',
+      },
+      {
+        text: '低',
+        value: '低',
+        color: 'green',
+      },
+      {
+        text: '中',
+        value: '中',
+        color: 'orange',
+      },
+      {
+        text: '高',
+        value: '高',
+        color: 'red',
+      },
+    ],
+  };
 </script>
