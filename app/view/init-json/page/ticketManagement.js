@@ -197,6 +197,14 @@ const content = {
         }
       },
       {
+        model: 'taskCreateAt',
+        default: "dayjs().format('YYYY-MM-DD hh:mm:ss')",
+        colsAttrs: {
+          class: 'd-none',
+        },
+      },
+    
+      {
         label: '审批名称',
         model: 'taskTitle',
         tag: 'v-text-field',
@@ -262,6 +270,20 @@ const content = {
         label: '详细信息',
         type: 'form',
         formItemList: [
+          {
+        model: 'taskCreateAt',
+        default: "dayjs().format('YYYY-MM-DD hh:mm:ss')",
+        colsAttrs: {
+          class: 'd-none',
+        },
+      },
+      {
+        model: 'taskManagerId',
+        default: 'window.userInfo.userId',
+        colsAttrs: {
+          class: 'd-none',
+        },
+      },
           {
             label: '审批名称',
             model: 'taskTitle',

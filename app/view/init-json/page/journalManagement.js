@@ -143,6 +143,20 @@ const content = {
         },
       },
       {
+        model: 'taskCreateAt',
+        default: "dayjs().format('YYYY-MM-DD hh:mm:ss')",
+        colsAttrs: {
+          class: 'd-none',
+        },
+      },
+      {
+        model: 'taskManagerId',
+        default: 'window.userInfo.userId',
+        colsAttrs: {
+          class: 'd-none',
+        },
+      },
+      {
         label: '日志名称',
         model: 'taskTitle',
         tag: 'v-text-field',
