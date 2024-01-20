@@ -53,6 +53,7 @@ const content = {
   ], // 其他资源引入
   common: {
     data: {
+      isMobile: 'window.innerWidth < 500',
       validationRules: {
         requireRules: [(v) => !!v || '必填'],
       },

@@ -57,54 +57,16 @@ const content = {
   ], // 额外resource { actionId, resourceType, resourceData }
   drawerList: [], // 抽屉列表 { key, title, contentList }
   includeList: [
+    { type: 'include', path: 'common/constant.html' },
     { type: 'include', path: 'component/task-attachment-list.html' },
     { type: 'include', path: 'component/task-child-list.html' },
     { type: 'include', path: 'component/task-comment-list.html' },
   ], // 其他资源引入
   common: {
     data: {
-      constantObj: {
-        member: [],
-        taskStatus: [
-          {
-            text: '未开始',
-            value: '未开始',
-            color: 'blue',
-          },
-          {
-            text: '进行中',
-            value: '进行中',
-            color: 'orange',
-          },
-          {
-            text: '已完成',
-            value: '已完成',
-            color: 'grey',
-          },
-        ],
-        taskLevel: [
-          {
-            text: '无',
-            value: '无',
-            color: 'grey',
-          },
-          {
-            text: '低',
-            value: '低',
-            color: 'green',
-          },
-          {
-            text: '中',
-            value: '中',
-            color: 'orange',
-          },
-          {
-            text: '高',
-            value: '高',
-            color: 'red',
-          },
-        ],
-      },
+      isMobile: 'window.innerWidth < 500',
+      constantObj: 'window.constantObj',
+      memberList: [],
       validationRules: {
         requireRules: [(v) => !!v || '必填'],
       },
@@ -149,7 +111,7 @@ const content = {
             },
           })
         ).data.appData.resultData.rows;
-        this.constantObj.member = rows;
+        this.memberList = rows;
       },
     },
   },
@@ -162,7 +124,7 @@ const content = {
         model: 'serverSearchWhereLike.taskManagerId',
         attrs: {
           prefix: '负责人',
-          ':items': 'constantObj.member',
+          ':items': 'memberList',
           'item-text': 'username',
           'item-value': 'userId',
         },
@@ -172,7 +134,7 @@ const content = {
         model: 'serverSearchWhere.taskMemberIdList',
         attrs: {
           prefix: '参与人',
-          ':items': 'constantObj.member',
+          ':items': 'memberList',
           'item-text': 'username',
           'item-value': 'userId',
         },
@@ -261,7 +223,7 @@ const content = {
           tag: "v-autocomplete", 
           value: '{{item.taskManagerId}}', 
           attrs: {
-            ':items': 'constantObj.member',
+            ':items': 'memberList',
             'v-model': 'item.taskManagerId',
             'item-text': 'username',
             'item-value': 'userId',
@@ -318,7 +280,7 @@ const content = {
         model: 'taskManagerId',
         tag: 'v-autocomplete',
         attrs: {
-          ':items': 'constantObj.member',
+          ':items': 'memberList',
           'item-text': 'username',
           'item-value': 'userId',
         },
@@ -328,7 +290,7 @@ const content = {
         model: 'taskMemberIdList',
         tag: 'v-autocomplete',
         attrs: {
-          ':items': 'constantObj.member',
+          ':items': 'memberList',
           'item-text': 'username',
           'item-value': 'userId',
           multiple: true,
@@ -386,7 +348,7 @@ const content = {
             model: 'taskManagerId',
             tag: 'v-autocomplete',
             attrs: {
-              ':items': 'constantObj.member',
+              ':items': 'memberList',
               'item-text': 'username',
               'item-value': 'userId',
             },
@@ -396,7 +358,7 @@ const content = {
             model: 'taskMemberIdList',
             tag: 'v-autocomplete',
             attrs: {
-              ':items': 'constantObj.member',
+              ':items': 'memberList',
               'item-text': 'username',
               'item-value': 'userId',
               multiple: true,

@@ -48,52 +48,14 @@ const content = {
   ], // 额外resource { actionId, resourceType, resourceData }
   drawerList: [], // 抽屉列表 { key, title, contentList }
   includeList: [
+    { type: 'include', path: 'common/constant.html' },
     { type: 'include', path: 'component/task-attachment-list.html' },
   ], // 其他资源引入
   common: {
     data: {
-      constantObj: {
-        member: [],
-        taskStatus: [
-          {
-            text: '未开始',
-            value: '未开始',
-            color: 'blue',
-          },
-          {
-            text: '进行中',
-            value: '进行中',
-            color: 'orange',
-          },
-          {
-            text: '已完成',
-            value: '已完成',
-            color: 'grey',
-          },
-        ],
-        taskLevel: [
-          {
-            text: '无',
-            value: '无',
-            color: 'grey',
-          },
-          {
-            text: '低',
-            value: '低',
-            color: 'green',
-          },
-          {
-            text: '中',
-            value: '中',
-            color: 'orange',
-          },
-          {
-            text: '高',
-            value: '高',
-            color: 'red',
-          },
-        ],
-      },
+      isMobile: 'window.innerWidth < 500',
+      memberList: [],
+      constantObj: 'window.constantObj',
       validationRules: {
         requireRules: [(v) => !!v || '必填'],
       },
@@ -121,7 +83,7 @@ const content = {
             },
           })
         ).data.appData.resultData.rows;
-        this.constantObj.member = rows;
+        this.constantObj.memberList = rows;
       },
     },
   },
@@ -131,12 +93,12 @@ const content = {
       {
         tag: 'v-select',
         model: 'serverSearchWhereLike.taskManagerId',
-        attrs: { prefix: '负责人', items: 'constantObj.member' },
+        attrs: { prefix: '负责人', items: 'constantObj.memberList' },
       },
       {
         tag: 'v-select',
         model: 'serverSearchWhere.taskMemberIdList',
-        attrs: { prefix: '参与人', items: 'constantObj.member' },
+        attrs: { prefix: '参与人', items: 'constantObj.memberList' },
       },
     ],
     serverSearchWhere: { taskType: '日志' },

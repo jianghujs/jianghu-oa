@@ -244,6 +244,7 @@ new Vue({
   vuetify: new Vuetify(),
   data: () => ({
     // ================================ common ================================ 
+    isMobile: window.innerWidth < 500, 
     validationRules: {
       requireRules: [
         (v) => !!v || '必填'

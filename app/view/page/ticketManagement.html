@@ -25,10 +25,10 @@
         <v-col cols="12" xs="12" sm="12" md="8" xl="9">
           <v-row class="jh-backend-form-container justify-end ma-0 py-3"> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 ">
-              <v-select prefix="负责人" :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhereLike.taskManagerId"></v-select>
+              <v-select prefix="负责人" :items="memberList" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhereLike.taskManagerId"></v-select>
             </v-col> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 pt-2 pt-sm-0">
-              <v-select prefix="参与人" :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskMemberIdList"></v-select>
+              <v-select prefix="参与人" :items="memberList" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskMemberIdList"></v-select>
             </v-col>
             <div class="jh-backend-search-btn ml-2">
               <v-btn class="elevation-0 float-right mt-2 mt-md-0" color="success" small @click="doUiAction('getTableData')">
@@ -148,7 +148,7 @@
           </v-col>
           <v-col cols="12" sm="12" md="4">
             <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>审批模板</span> 
-            <v-select :items="constantObj.taskTemplate" item-text="taskTemplateName" item-value="taskTemplateId" @change="doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: createItem})" class="jh-v-input" dense single-line filled v-model="createItem.taskTemplateId" :rules="validationRules.requireRules"></v-select>
+            <v-select :items="taskTemplateList" item-text="taskTemplateName" item-value="taskTemplateId" @change="doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: createItem})" class="jh-v-input" dense single-line filled v-model="createItem.taskTemplateId" :rules="validationRules.requireRules"></v-select>
           </v-col>
           <v-col cols="12" sm="12" md="12"> 
             <v-col v-if="createItem.taskAuditConfig.length" class="jh-v-input" dense single-line filled v-model="createItem.taskAuditConfig">
@@ -158,7 +158,7 @@
               disabled></v-text-field>
           </v-col>
           <v-col cols="4">
-            <v-autocomplete hide-actions hide-controls hide-details :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input mr-2" dense
+            <v-autocomplete hide-actions hide-controls hide-details :items="memberList" item-text="username" item-value="userId" class="jh-v-input mr-2" dense
               filled single-line :rules="validationRules.requireRules" v-model="item.userId" disabled>
             </v-autocomplete>
           </v-row>
@@ -221,7 +221,7 @@
               </v-col>
               <v-col cols="12" sm="12" md="4" >
                 <span class="jh-input-label"><span class="red--text text--accent-2 ml-1">* </span>审批模板</span> 
-                <v-select :items="constantObj.taskTemplate" item-text="taskTemplateName" item-value="taskTemplateId" @change="doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: updateItem})" class="jh-v-input" dense single-line filled v-model="updateItem.taskTemplateId" :rules="validationRules.requireRules"></v-select>
+                <v-select :items="taskTemplateList" item-text="taskTemplateName" item-value="taskTemplateId" @change="doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: updateItem})" class="jh-v-input" dense single-line filled v-model="updateItem.taskTemplateId" :rules="validationRules.requireRules"></v-select>
               </v-col>
               <v-col cols="12" sm="12" md="12" > 
                 <v-col v-if="updateItem.taskAuditConfig.length" class="jh-v-input" dense single-line filled v-model="updateItem.taskAuditConfig">
@@ -231,7 +231,7 @@
                   disabled></v-text-field>
               </v-col>
               <v-col cols="4">
-                <v-autocomplete hide-actions hide-controls hide-details :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input mr-2" dense
+                <v-autocomplete hide-actions hide-controls hide-details :items="memberList" item-text="username" item-value="userId" class="jh-v-input mr-2" dense
                   filled single-line :rules="validationRules.requireRules" v-model="item.userId" disabled>
                 </v-autocomplete>
               </v-row>
@@ -294,49 +294,10 @@ new Vue({
   vuetify: new Vuetify(),
   data: () => ({
     // ================================ common ================================ 
-    constantObj: {
-      taskTemplate: [],
-      member: [],
-      taskStatus: [
-        {
-          text: "未开始",
-          value: "未开始",
-          color: "blue"
-        },
-        {
-          text: "进行中",
-          value: "进行中",
-          color: "orange"
-        },
-        {
-          text: "已完成",
-          value: "已完成",
-          color: "grey"
-        }
-      ],
-      taskLevel: [
-        {
-          text: "无",
-          value: "无",
-          color: "grey"
-        },
-        {
-          text: "低",
-          value: "低",
-          color: "green"
-        },
-        {
-          text: "中",
-          value: "中",
-          color: "orange"
-        },
-        {
-          text: "高",
-          value: "高",
-          color: "red"
-        }
-      ]
-    }, 
+    isMobile: window.innerWidth < 500, 
+    constantObj: window.constantObj, 
+    taskTemplateList: [], 
+    memberList: [], 
     createItem: {}, 
     validationRules: {
       requireRules: [
@@ -660,10 +621,10 @@ new Vue({
           },
         })
       ).data.appData.resultData.rows;
-      this.constantObj.member = rows;
+      this.memberList = rows;
     }, 
     async handleTaskTemplateChange({ taskTemplateId, item }) {
-      const taskTemplate = this.constantObj.taskTemplate.find(item => item.taskTemplateId === taskTemplateId);
+      const taskTemplate = this.taskTemplateList.find(item => item.taskTemplateId === taskTemplateId);
       item.taskAuditConfig = JSON.parse(taskTemplate.taskTemplatePersonList);
     }, 
     async getTaskTemplate() {
@@ -679,7 +640,7 @@ new Vue({
           },
         })
       ).data.appData.resultData.rows;
-      this.constantObj.taskTemplate = rows;
+      this.taskTemplateList = rows;
     },
     // ---------- <<<<<<<<<<< Custom uiAction ---------
   }

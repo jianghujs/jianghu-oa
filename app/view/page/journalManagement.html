@@ -25,10 +25,10 @@
         <v-col cols="12" xs="12" sm="12" md="8" xl="9">
           <v-row class="jh-backend-form-container justify-end ma-0 py-3"> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 ">
-              <v-select prefix="负责人" class="jh-v-input" dense single-line filled v-model="serverSearchWhereLike.taskManagerId" :items="constantObj.member"></v-select>
+              <v-select prefix="负责人" class="jh-v-input" dense single-line filled v-model="serverSearchWhereLike.taskManagerId" :items="constantObj.memberList"></v-select>
             </v-col> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 pt-2 pt-sm-0">
-              <v-select prefix="参与人" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskMemberIdList" :items="constantObj.member"></v-select>
+              <v-select prefix="参与人" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskMemberIdList" :items="constantObj.memberList"></v-select>
             </v-col>
             <div class="jh-backend-search-btn ml-2">
               <v-btn class="elevation-0 float-right mt-2 mt-md-0" color="success" small @click="doUiAction('getTableData')">
@@ -249,6 +249,7 @@
 {% block vueScript %}
 {% include 'common/jianghuJs/fixedTableHeightV4.html' %}
 {% include 'component/tableRecordHistory.html' %}
+{% include "common/constant.html" %}
 {% include "component/task-attachment-list.html" %}
 
 <script type="module">
@@ -258,48 +259,9 @@ new Vue({
   vuetify: new Vuetify(),
   data: () => ({
     // ================================ common ================================ 
-    constantObj: {
-      member: [],
-      taskStatus: [
-        {
-          text: "未开始",
-          value: "未开始",
-          color: "blue"
-        },
-        {
-          text: "进行中",
-          value: "进行中",
-          color: "orange"
-        },
-        {
-          text: "已完成",
-          value: "已完成",
-          color: "grey"
-        }
-      ],
-      taskLevel: [
-        {
-          text: "无",
-          value: "无",
-          color: "grey"
-        },
-        {
-          text: "低",
-          value: "低",
-          color: "green"
-        },
-        {
-          text: "中",
-          value: "中",
-          color: "orange"
-        },
-        {
-          text: "高",
-          value: "高",
-          color: "red"
-        }
-      ]
-    }, 
+    isMobile: window.innerWidth < 500, 
+    memberList: [], 
+    constantObj: window.constantObj, 
     validationRules: {
       requireRules: [
         (v) => !!v || '必填'
@@ -606,7 +568,7 @@ new Vue({
           },
         })
       ).data.appData.resultData.rows;
-      this.constantObj.member = rows;
+      this.constantObj.memberList = rows;
     },
     // ---------- <<<<<<<<<<< Custom uiAction ---------
   }

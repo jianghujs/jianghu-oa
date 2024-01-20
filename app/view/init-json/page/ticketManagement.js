@@ -72,54 +72,16 @@ const content = {
   ], // 额外resource { actionId, resourceType, resourceData }
   drawerList: [], // 抽屉列表 { key, title, contentList }
   includeList: [
+    { type: 'include', path: 'common/constant.html' },
     { type: 'include', path: 'component/task-attachment-list.html' },
 
   ], // 其他资源引入
   common: {
     data: {
-      constantObj: {
-        taskTemplate: [],
-        member: [],
-        taskStatus: [
-          {
-            text: '未开始',
-            value: '未开始',
-            color: 'blue',
-          },
-          {
-            text: '进行中',
-            value: '进行中',
-            color: 'orange',
-          },
-          {
-            text: '已完成',
-            value: '已完成',
-            color: 'grey',
-          },
-        ],
-        taskLevel: [
-          {
-            text: '无',
-            value: '无',
-            color: 'grey',
-          },
-          {
-            text: '低',
-            value: '低',
-            color: 'green',
-          },
-          {
-            text: '中',
-            value: '中',
-            color: 'orange',
-          },
-          {
-            text: '高',
-            value: '高',
-            color: 'red',
-          },
-        ],
-      },
+      isMobile: 'window.innerWidth < 500',
+      constantObj: 'window.constantObj',
+      taskTemplateList: [],
+      memberList: [],
       createItem: {},
       validationRules: {
         requireRules: [(v) => !!v || '必填'],
@@ -151,10 +113,10 @@ const content = {
             },
           })
         ).data.appData.resultData.rows;
-        this.constantObj.member = rows;
+        this.memberList = rows;
       },
       async handleTaskTemplateChange({ taskTemplateId, item }) {
-        const taskTemplate = this.constantObj.taskTemplate.find(item => item.taskTemplateId === taskTemplateId);
+        const taskTemplate = this.taskTemplateList.find(item => item.taskTemplateId === taskTemplateId);
         item.taskAuditConfig = JSON.parse(taskTemplate.taskTemplatePersonList);
       },
 
@@ -171,7 +133,7 @@ const content = {
             },
           })
         ).data.appData.resultData.rows;
-        this.constantObj.taskTemplate = rows;
+        this.taskTemplateList = rows;
       },
     },
   },
@@ -183,7 +145,7 @@ const content = {
         model: 'serverSearchWhereLike.taskManagerId',
         attrs: {
           prefix: '负责人',
-          ':items': 'constantObj.member',
+          ':items': 'memberList',
           'item-text': 'username',
           'item-value': 'userId',
         },
@@ -193,7 +155,7 @@ const content = {
         model: 'serverSearchWhere.taskMemberIdList',
         attrs: {
           prefix: '参与人',
-          ':items': 'constantObj.member',
+          ':items': 'memberList',
           'item-text': 'username',
           'item-value': 'userId',
         },
@@ -250,7 +212,7 @@ const content = {
         required: true,
         rules: 'validationRules.requireRules',
         attrs: {
-          ':items': 'constantObj.taskTemplate',
+          ':items': 'taskTemplateList',
           'item-text': 'taskTemplateName',
           'item-value': 'taskTemplateId',
           '@change': "doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: createItem})"
@@ -270,7 +232,7 @@ const content = {
               disabled></v-text-field>
           </v-col>
           <v-col cols="4">
-            <v-autocomplete hide-actions hide-controls hide-details :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input mr-2" dense
+            <v-autocomplete hide-actions hide-controls hide-details :items="memberList" item-text="username" item-value="userId" class="jh-v-input mr-2" dense
               filled single-line :rules="validationRules.requireRules" v-model="item.userId" disabled>
             </v-autocomplete>
           </v-row>
@@ -316,7 +278,7 @@ const content = {
             required: true,
             rules: 'validationRules.requireRules',
             attrs: {
-              ':items': 'constantObj.taskTemplate',
+              ':items': 'taskTemplateList',
               'item-text': 'taskTemplateName',
               'item-value': 'taskTemplateId',
               '@change': "doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: updateItem})"
@@ -334,7 +296,7 @@ const content = {
                   disabled></v-text-field>
               </v-col>
               <v-col cols="4">
-                <v-autocomplete hide-actions hide-controls hide-details :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input mr-2" dense
+                <v-autocomplete hide-actions hide-controls hide-details :items="memberList" item-text="username" item-value="userId" class="jh-v-input mr-2" dense
                   filled single-line :rules="validationRules.requireRules" v-model="item.userId" disabled>
                 </v-autocomplete>
               </v-row>

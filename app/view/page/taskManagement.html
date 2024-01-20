@@ -25,10 +25,10 @@
         <v-col cols="12" xs="12" sm="12" md="8" xl="9">
           <v-row class="jh-backend-form-container justify-end ma-0 py-3"> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 ">
-              <v-select prefix="负责人" :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhereLike.taskManagerId"></v-select>
+              <v-select prefix="负责人" :items="memberList" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhereLike.taskManagerId"></v-select>
             </v-col> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 pt-2 pt-sm-0">
-              <v-select prefix="参与人" :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskMemberIdList"></v-select>
+              <v-select prefix="参与人" :items="memberList" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskMemberIdList"></v-select>
             </v-col> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 pt-2 pt-sm-0">
               <v-select prefix="优先级" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskLevel" :items="constantObj.taskLevel"></v-select>
@@ -100,7 +100,7 @@
             <v-text-field v-model="item.taskEndAt" dense filled single-line class="jh-v-input" @blur="doUiAction('updateTaskItem', {id: item.id, data: {taskEndAt: item.taskEndAt}})">            </v-text-field>
           </template>
           <template v-slot:item.taskManagerId="{item, index}">
-            <v-autocomplete :items="constantObj.member" v-model="item.taskManagerId" item-text="username" item-value="userId" dense filled single-line class="jh-v-input" @change="doUiAction('updateTaskItem', {id: item.id, data: {taskManagerId: item.taskManagerId}})">
+            <v-autocomplete :items="memberList" v-model="item.taskManagerId" item-text="username" item-value="userId" dense filled single-line class="jh-v-input" @change="doUiAction('updateTaskItem', {id: item.id, data: {taskManagerId: item.taskManagerId}})">
               {{item.taskManagerId}}
             </v-autocomplete>
           </template>
@@ -205,11 +205,11 @@
           </v-col>
           <v-col cols="12" sm="12" md="4">
             <span class="jh-input-label">负责人id</span> 
-            <v-autocomplete :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="createItem.taskManagerId"></v-autocomplete>
+            <v-autocomplete :items="memberList" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="createItem.taskManagerId"></v-autocomplete>
           </v-col>
           <v-col cols="12" sm="12" md="4">
             <span class="jh-input-label">参与人id</span> 
-            <v-autocomplete :items="constantObj.member" item-text="username" item-value="userId" :multiple="true" class="jh-v-input" dense single-line filled v-model="createItem.taskMemberIdList"></v-autocomplete>
+            <v-autocomplete :items="memberList" item-text="username" item-value="userId" :multiple="true" class="jh-v-input" dense single-line filled v-model="createItem.taskMemberIdList"></v-autocomplete>
           </v-col>
           <v-col cols="12" sm="12" md="12">
             <span class="jh-input-label">子任务</span> 
@@ -294,11 +294,11 @@
               </v-col>
               <v-col cols="12" sm="12" md="4" >
                 <span class="jh-input-label">负责人id</span> 
-                <v-autocomplete :items="constantObj.member" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="updateItem.taskManagerId"></v-autocomplete>
+                <v-autocomplete :items="memberList" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="updateItem.taskManagerId"></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="12" md="4" >
                 <span class="jh-input-label">参与人id</span> 
-                <v-autocomplete :items="constantObj.member" item-text="username" item-value="userId" :multiple="true" class="jh-v-input" dense single-line filled v-model="updateItem.taskMemberIdList"></v-autocomplete>
+                <v-autocomplete :items="memberList" item-text="username" item-value="userId" :multiple="true" class="jh-v-input" dense single-line filled v-model="updateItem.taskMemberIdList"></v-autocomplete>
               </v-col>
               <v-col cols="12" sm="12" md="12" >
                 <span class="jh-input-label">子任务</span> 
@@ -356,6 +356,7 @@
 {% block vueScript %}
 {% include 'common/jianghuJs/fixedTableHeightV4.html' %}
 {% include 'component/tableRecordHistory.html' %}
+{% include "common/constant.html" %}
 {% include "component/task-attachment-list.html" %}
 {% include "component/task-child-list.html" %}
 {% include "component/task-comment-list.html" %}
@@ -367,48 +368,9 @@ new Vue({
   vuetify: new Vuetify(),
   data: () => ({
     // ================================ common ================================ 
-    constantObj: {
-      member: [],
-      taskStatus: [
-        {
-          text: "未开始",
-          value: "未开始",
-          color: "blue"
-        },
-        {
-          text: "进行中",
-          value: "进行中",
-          color: "orange"
-        },
-        {
-          text: "已完成",
-          value: "已完成",
-          color: "grey"
-        }
-      ],
-      taskLevel: [
-        {
-          text: "无",
-          value: "无",
-          color: "grey"
-        },
-        {
-          text: "低",
-          value: "低",
-          color: "green"
-        },
-        {
-          text: "中",
-          value: "中",
-          color: "orange"
-        },
-        {
-          text: "高",
-          value: "高",
-          color: "red"
-        }
-      ]
-    }, 
+    isMobile: window.innerWidth < 500, 
+    constantObj: window.constantObj, 
+    memberList: [], 
     validationRules: {
       requireRules: [
         (v) => !!v || '必填'
@@ -751,7 +713,7 @@ new Vue({
           },
         })
       ).data.appData.resultData.rows;
-      this.constantObj.member = rows;
+      this.memberList = rows;
     },
     // ---------- <<<<<<<<<<< Custom uiAction ---------
   }
