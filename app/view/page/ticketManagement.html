@@ -75,7 +75,7 @@
           <template v-slot:item.action="{ item }">
 
             <template>
-              <span v-if="item.taskAuditUserIdList.includes(userId) && currentSceneId != 'scene1'" role="button" class="success--text font-weight-medium font-size-2 mr-2" @click="doUiAction('viewMemberList', item)">
+              <span v-if="item.taskAuditUserIdList.includes(userId) && currentSceneId != 'scene1'" role="button" class="success--text font-weight-medium font-size-2 mr-2" @click="doUiAction('viewTicketDetailDrawer', item)">
               <v-icon size="16" class="success--text">mdi-note-edit-outline</v-icon>审批
             </span>
               <!-- pc端 -->
@@ -275,6 +275,8 @@
       </v-btn>
     </v-navigation-drawer>
     <!-- <<<<<<<<<<<<< 编辑抽屉 -->
+    <view-ticket-detail-drawer ref="viewTicketDetailDrawerRef" />
+
 
     <!-- 帮助页抽屉 >>>>>>>>>>>>> --> 
     <v-navigation-drawer v-if="isHelpPageDrawerLoaded" v-model="isHelpPageDrawerShown" :permanent="isHelpPageDrawerShown" fixed temporary right width="80%" class="elevation-24">
@@ -398,6 +400,9 @@ new Vue({
     async doUiAction(uiActionId, uiActionData) {
       try {
         switch (uiActionId) { 
+          case 'viewTicketDetailDrawer': 
+            await this.viewTicketDetailDrawer(uiActionData);
+            break; 
           case 'useScene': 
             await this.useScene(uiActionData); 
             await this.getTableData(uiActionData);
@@ -651,6 +656,11 @@ new Vue({
     },
     // ---------- <<<<<<<<<<< 删除数据 uiAction --------- 
     // ---------- Custom uiAction >>>>>>>>>>>> -------- 
+    viewTicketDetailDrawer(item) {
+      this.$refs.viewTicketDetailDrawerRef.doUiAction('open', {
+        taskId: item.taskId,
+      });
+    }, 
     useScene(funObj) {
       this.currentSceneId = funObj.id;
       this.serverSearchWhereLike = _.cloneDeep(funObj.form);

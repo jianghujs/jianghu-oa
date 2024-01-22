@@ -71,14 +71,26 @@ const content = {
       desc: '✅查询操作记录',
       resourceData: { table: '_record_history', operation: 'select' },
     },
+    {
+      actionId: 'handleTicketApply',
+      resourceType: 'service',
+      resourceHook: {},
+      desc: '✅处理审批',
+      resourceData: {
+        service: 'ticket',
+        serviceFunction: 'handleTicketApply',
+      },
+    },
   ], // 额外resource { actionId, resourceType, resourceData }
-  drawerList: [
-
-  ], // 抽屉列表 { key, title, contentList }
+  drawerList: [], // 抽屉列表 { key, title, contentList }
   includeList: [
     { type: 'include', path: 'common/constant.html' },
     { type: 'include', path: 'component/task-attachment-list.html' },
-    { type: 'include', path: 'component/view-ticket-detail-drawer.html', includeType: 'auto' },
+    {
+      type: 'include',
+      path: 'component/view-ticket-detail-drawer.html',
+      includeType: 'auto',
+    },
   ], // 其他资源引入
   common: {
     data: {
@@ -120,12 +132,18 @@ const content = {
     watch: {},
     computed: {},
     doUiAction: {
+      viewTicketDetailDrawer: ['viewTicketDetailDrawer'],
       useScene: ['useScene', 'getTableData'],
       getUserList: ['getUserList'],
       getTaskTemplate: ['getTaskTemplate'],
       handleTaskTemplateChange: ['handleTaskTemplateChange'],
     }, // 额外uiAction { [key]: [action1, action2]}
     methods: {
+      viewTicketDetailDrawer(item) {
+        this.$refs.viewTicketDetailDrawerRef.doUiAction('open', {
+          taskId: item.taskId,
+        });
+      },
       useScene(funObj) {
         this.currentSceneId = funObj.id;
         this.serverSearchWhereLike = _.cloneDeep(funObj.form);
@@ -214,7 +232,7 @@ const content = {
           'v-if': `item.taskAuditUserIdList.includes(userId) && currentSceneId != 'scene1'`,
           role: 'button',
           class: 'success--text font-weight-medium font-size-2 mr-2',
-          '@click': "doUiAction('viewMemberList', item)",
+          '@click': "doUiAction('viewTicketDetailDrawer', item)",
         },
       },
     ],

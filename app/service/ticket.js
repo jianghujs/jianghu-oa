@@ -33,7 +33,7 @@ class TicketService extends Service {
       auditedUsers.push(userId);
     }
     const auditConfig = JSON.parse(task.taskAuditConfig);
-    const userAudit = auditConfig.find(item => item.userId === userId && !item.status);
+    const userAudit = auditConfig.find(item => item.userId === userId && !item.status) || {};
     if (userAudit) {
       userAudit.username = username;
       userAudit.status = status;
