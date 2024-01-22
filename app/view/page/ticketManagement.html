@@ -25,10 +25,11 @@
         <v-col cols="12" xs="12" sm="12" md="8" xl="9">
           <v-row class="jh-backend-form-container justify-end ma-0 py-3"> 
             <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 ">
-              <v-select prefix="负责人" :items="memberList" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhereLike.taskManagerId"></v-select>
-            </v-col> 
-            <v-col cols="12" xs="6" sm="4" md="3" xl="2" class="pa-0 pr-0 pl-md-2 pt-2 pt-sm-0">
-              <v-select prefix="参与人" :items="memberList" item-text="username" item-value="userId" class="jh-v-input" dense single-line filled v-model="serverSearchWhere.taskMemberIdList"></v-select>
+              <div class="text-right" :dense="true" :single-line="true" :filled="true">
+          <v-btn-toggle :value="0" @change="doUiAction('useScene', sceneList[$event])" color="success" small>
+            <v-btn v-for="scene in sceneList" small>{{scene.name}}</v-btn>
+          </v-btn-toggle>
+        </div>
             </v-col>
             <div class="jh-backend-search-btn ml-2">
               <v-btn class="elevation-0 float-right mt-2 mt-md-0" color="success" small @click="doUiAction('getTableData')">
@@ -74,6 +75,9 @@
           <template v-slot:item.action="{ item }">
 
             <template>
+              <span v-if="item.taskAuditUserIdList.includes(userId) && currentSceneId != 'scene1'" role="button" class="success--text font-weight-medium font-size-2 mr-2" @click="doUiAction('viewMemberList', item)">
+              <v-icon size="16" class="success--text">mdi-note-edit-outline</v-icon>审批
+            </span>
               <!-- pc端 -->
               <template v-if="!isMobile">
                 <span role="button" class="success--text font-weight-medium font-size-2 mr-2" @click="doUiAction('startUpdateItem', item)">
@@ -296,6 +300,7 @@
 {% include 'component/tableRecordHistory.html' %}
 {% include "common/constant.html" %}
 {% include "component/task-attachment-list.html" %}
+{% include "component/view-ticket-detail-drawer.html" %}
 
 <script type="module">
 new Vue({
@@ -309,18 +314,38 @@ new Vue({
     taskTemplateList: [], 
     memberList: [], 
     createItem: {}, 
+    userId: window.userInfo.userId, 
     validationRules: {
       requireRules: [
         (v) => !!v || '必填'
       ]
-    },
+    }, 
+    currentSceneId: 'scene1', 
+    sceneList: [
+      {
+        form: {
+          taskManagerId: "<$ ctx.userInfo.userId $>",
+          taskType: "审批"
+        },
+        name: "我的申请",
+        id: "scene1"
+      },
+      {
+        form: {
+          taskAuditUserIdList: "%<$ ctx.userInfo.userId $>%",
+          taskType: "审批"
+        },
+        name: "我的待办",
+        id: "scene2"
+      }
+    ],
     // ================================ headContent ================================
     serverSearchWhere: {
       taskType: "审批"
     },
     serverSearchWhereLike: {
       taskManagerId: "<$ ctx.userInfo.userId $>",
-      taskMemberIdList: null
+      taskType: "审批"
     },
     isHelpPageDrawerShown: false,
     isHelpPageDrawerLoaded: false,
@@ -373,6 +398,10 @@ new Vue({
     async doUiAction(uiActionId, uiActionData) {
       try {
         switch (uiActionId) { 
+          case 'useScene': 
+            await this.useScene(uiActionData); 
+            await this.getTableData(uiActionData);
+            break; 
           case 'getUserList': 
             await this.getUserList(uiActionData);
             break; 
@@ -622,6 +651,10 @@ new Vue({
     },
     // ---------- <<<<<<<<<<< 删除数据 uiAction --------- 
     // ---------- Custom uiAction >>>>>>>>>>>> -------- 
+    useScene(funObj) {
+      this.currentSceneId = funObj.id;
+      this.serverSearchWhereLike = _.cloneDeep(funObj.form);
+    }, 
     async getUserList() {
       const rows = (
         await window.jianghuAxios({
@@ -638,7 +671,9 @@ new Vue({
       this.memberList = rows;
     }, 
     async handleTaskTemplateChange({ taskTemplateId, item }) {
-      const taskTemplate = this.taskTemplateList.find(item => item.taskTemplateId === taskTemplateId);
+      const taskTemplate = this.taskTemplateList.find(
+        (item) => item.taskTemplateId === taskTemplateId
+      );
       item.taskAuditConfig = JSON.parse(taskTemplate.taskTemplatePersonList);
     }, 
     async getTaskTemplate() {

@@ -3,11 +3,6 @@ const content = {
   pageId: 'ticketManagement',
   table: 'task',
   pageName: '审批管理',
-  idGenerate: {
-    prefix: 'SP',
-    bizId: 'taskId',
-    startValue: 10001,
-  },
   resourceList: [
     {
       actionId: 'selectItemList',
@@ -74,14 +69,16 @@ const content = {
       resourceType: 'sql',
       resourceHook: {},
       desc: '✅查询操作记录',
-      resourceData: { "table": "_record_history", "operation": "select" },
+      resourceData: { table: '_record_history', operation: 'select' },
     },
   ], // 额外resource { actionId, resourceType, resourceData }
-  drawerList: [], // 抽屉列表 { key, title, contentList }
+  drawerList: [
+
+  ], // 抽屉列表 { key, title, contentList }
   includeList: [
     { type: 'include', path: 'common/constant.html' },
     { type: 'include', path: 'component/task-attachment-list.html' },
-
+    { type: 'include', path: 'component/view-ticket-detail-drawer.html', includeType: 'auto' },
   ], // 其他资源引入
   common: {
     data: {
@@ -90,9 +87,30 @@ const content = {
       taskTemplateList: [],
       memberList: [],
       createItem: {},
+      userId: 'window.userInfo.userId',
       validationRules: {
         requireRules: [(v) => !!v || '必填'],
       },
+
+      currentSceneId: "'scene1'",
+      sceneList: [
+        {
+          form: {
+            taskManagerId: '<$ ctx.userInfo.userId $>',
+            taskType: '审批',
+          },
+          name: '我的申请',
+          id: 'scene1',
+        },
+        {
+          form: {
+            taskAuditUserIdList: `%<$ ctx.userInfo.userId $>%`,
+            taskType: '审批',
+          },
+          name: '我的待办',
+          id: 'scene2',
+        },
+      ],
     },
     created() {
       this.doUiAction('getTableData');
@@ -102,11 +120,17 @@ const content = {
     watch: {},
     computed: {},
     doUiAction: {
+      useScene: ['useScene', 'getTableData'],
       getUserList: ['getUserList'],
       getTaskTemplate: ['getTaskTemplate'],
       handleTaskTemplateChange: ['handleTaskTemplateChange'],
     }, // 额外uiAction { [key]: [action1, action2]}
     methods: {
+      useScene(funObj) {
+        this.currentSceneId = funObj.id;
+        this.serverSearchWhereLike = _.cloneDeep(funObj.form);
+      },
+
       async getUserList() {
         const rows = (
           await window.jianghuAxios({
@@ -123,7 +147,9 @@ const content = {
         this.memberList = rows;
       },
       async handleTaskTemplateChange({ taskTemplateId, item }) {
-        const taskTemplate = this.taskTemplateList.find(item => item.taskTemplateId === taskTemplateId);
+        const taskTemplate = this.taskTemplateList.find(
+          (item) => item.taskTemplateId === taskTemplateId
+        );
         item.taskAuditConfig = JSON.parse(taskTemplate.taskTemplatePersonList);
       },
 
@@ -148,30 +174,22 @@ const content = {
     helpDrawer: {}, // 自动初始化md文件
     serverSearchList: [
       {
-        tag: 'v-select',
-        model: 'serverSearchWhereLike.taskManagerId',
+        tag: 'div',
+        model: '',
+        value: `
+          <v-btn-toggle :value="0" @change="doUiAction('useScene', sceneList[$event])" color="success" small>
+            <v-btn v-for="scene in sceneList" small>{{scene.name}}</v-btn>
+          </v-btn-toggle>
+        `,
         attrs: {
-          prefix: '负责人',
-          ':items': 'memberList',
-          'item-text': 'username',
-          'item-value': 'userId',
-        },
-      },
-      {
-        tag: 'v-select',
-        model: 'serverSearchWhere.taskMemberIdList',
-        attrs: {
-          prefix: '参与人',
-          ':items': 'memberList',
-          'item-text': 'username',
-          'item-value': 'userId',
+          class: 'text-right',
         },
       },
     ],
     serverSearchWhere: { taskType: '审批' },
     serverSearchWhereLike: {
       taskManagerId: '<$ ctx.userInfo.userId $>',
-      taskMemberIdList: null,
+      taskType: '审批',
     },
   },
   pageContent: {
@@ -188,6 +206,18 @@ const content = {
       { text: '操作时间', value: 'operationAt', width: 250 },
       { text: '操作', value: 'action', width: 120 },
     ],
+    rowActionList: [
+      {
+        tag: 'span',
+        value: `<v-icon size="16" class="success--text">mdi-note-edit-outline</v-icon>审批`,
+        attrs: {
+          'v-if': `item.taskAuditUserIdList.includes(userId) && currentSceneId != 'scene1'`,
+          role: 'button',
+          class: 'success--text font-weight-medium font-size-2 mr-2',
+          '@click': "doUiAction('viewMemberList', item)",
+        },
+      },
+    ],
   },
   createDrawerContent: {
     formItemList: [
@@ -200,8 +230,8 @@ const content = {
           startValue: 10001,
         },
         colsAttrs: {
-          class: 'd-none'
-        }
+          class: 'd-none',
+        },
       },
       {
         model: 'taskCreateAt',
@@ -210,7 +240,7 @@ const content = {
           class: 'd-none',
         },
       },
-    
+
       {
         label: '审批名称',
         model: 'taskTitle',
@@ -230,12 +260,13 @@ const content = {
           ':items': 'taskTemplateList',
           'item-text': 'taskTemplateName',
           'item-value': 'taskTemplateId',
-          '@change': "doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: createItem})"
+          '@change':
+            "doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: createItem})",
         },
       },
       {
         label: '',
-        default: "[]",
+        default: '[]',
         cols: 12,
         tag: 'v-col',
         model: 'taskAuditConfig',
@@ -260,7 +291,7 @@ const content = {
       },
       {
         label: '附件列表',
-        default: "[]",
+        default: '[]',
         cols: 12,
         model: 'taskFileList',
         valueType: 'json',
@@ -278,19 +309,19 @@ const content = {
         type: 'form',
         formItemList: [
           {
-        model: 'taskCreateAt',
-        default: "dayjs().format('YYYY-MM-DD hh:mm:ss')",
-        colsAttrs: {
-          class: 'd-none',
-        },
-      },
-      {
-        model: 'taskManagerId',
-        default: 'window.userInfo.userId',
-        colsAttrs: {
-          class: 'd-none',
-        },
-      },
+            model: 'taskCreateAt',
+            default: "dayjs().format('YYYY-MM-DD hh:mm:ss')",
+            colsAttrs: {
+              class: 'd-none',
+            },
+          },
+          {
+            model: 'taskManagerId',
+            default: 'window.userInfo.userId',
+            colsAttrs: {
+              class: 'd-none',
+            },
+          },
           {
             label: '审批名称',
             model: 'taskTitle',
@@ -299,7 +330,12 @@ const content = {
             rules: 'validationRules.requireRules',
           },
           { label: '审批描述', model: 'taskDesc', tag: 'v-text-field' },
-          { label: '审批内容', model: 'taskContent', cols: 12, tag: 'v-textarea' },
+          {
+            label: '审批内容',
+            model: 'taskContent',
+            cols: 12,
+            tag: 'v-textarea',
+          },
           {
             label: '审批模板',
             model: 'taskTemplateId',
@@ -310,7 +346,8 @@ const content = {
               ':items': 'taskTemplateList',
               'item-text': 'taskTemplateName',
               'item-value': 'taskTemplateId',
-              '@change': "doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: updateItem})"
+              '@change':
+                "doUiAction('handleTaskTemplateChange', { taskTemplateId: $event, item: updateItem})",
             },
           },
           {
