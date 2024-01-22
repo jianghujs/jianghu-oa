@@ -1,0 +1,65 @@
+<template id="icon-picker">
+  <v-menu
+  :nudge-right="40"
+  transition="scale-transition"
+  offset-y
+  min-width="auto"
+  max-width="20%"
+  max-height="60%"
+>
+  <template v-slot:activator="{ on, attrs }">
+    <v-text-field
+      class="jh-v-input"
+      dense
+      single-line
+      filled
+      v-model="value"
+      v-bind="attrs"
+      v-on="on"
+    >
+      <template #prepend-inner>
+        <v-icon>mdi-{{value}}</v-icon>
+      </template>
+      <template v-slot:append>
+        <v-icon>mdi-menu-down</v-icon>
+      </template>
+    </v-text-field>
+  </template>
+  <v-card>
+    <div class="d-flex flex-wrap">
+      <div
+        v-for="icon in materialDesignIcons"
+        :class="`item-icon pa-2 ${value == icon && 'green'}`"
+        @click="value=icon"
+      >
+        <v-btn x-small icon>
+          <v-icon>mdi-{{icon}}</v-icon></v-btn
+        >
+      </div>
+    </div>
+  </v-card>
+</v-menu>
+</template>
+<script src="/<$ ctx.app.config.appId $>/public/material-design-icons.js"></script>
+<script type="module">
+  Vue.component("icon-picker", {
+    template: '#icon-picker',
+    props: {
+      value: {
+        type: String,
+        default: "",
+      },
+    },
+    data: () => ({
+      materialDesignIcons
+    }),
+    created() {
+    },
+    methods: {
+      
+    },
+  })
+</script>
+<style scoped>
+  
+</style>

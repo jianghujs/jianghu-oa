@@ -45,10 +45,18 @@ const content = {
         operation: 'jhDelete',
       },
     },
+    {
+      actionId: 'selectRecordHistory',
+      resourceType: 'sql',
+      resourceHook: {},
+      desc: '✅查询操作记录',
+      resourceData: { "table": "_record_history", "operation": "select" },
+    },
   ], // 额外resource { actionId, resourceType, resourceData }
   drawerList: [], // 抽屉列表 { key, title, contentList }
   includeList: [
     { type: 'include', path: 'component/task-approval-person-list.html' },
+    { type: 'include', path: 'component/icon-picker.html' },
 
   ], // 其他资源引入
   common: {
@@ -142,7 +150,7 @@ const content = {
       {
         label: '任务模板icon',
         model: 'taskTemplateIcon',
-        tag: 'v-text-field',
+        tag: 'icon-picker',
         rules: 'validationRules.requireRules',
       },
       {
@@ -172,7 +180,7 @@ const content = {
           {
             label: '任务模板icon',
             model: 'taskTemplateIcon',
-            tag: 'v-text-field',
+            tag: 'icon-picker',
             rules: 'validationRules.requireRules',
           },
           {

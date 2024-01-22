@@ -134,7 +134,7 @@
           </v-col>
           <v-col cols="12" sm="12" md="4" >
             <span class="jh-input-label">任务模板icon</span> 
-            <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskTemplateIcon" :rules="validationRules.requireRules"></v-text-field>
+            <icon-picker class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="createItem.taskTemplateIcon" :rules="validationRules.requireRules"></icon-picker>
           </v-col>
           <v-col cols="12" sm="12" md="12" >
             <span class="jh-input-label">审批人列表</span> 
@@ -185,7 +185,7 @@
               </v-col>
               <v-col cols="12" sm="12" md="4" >
                 <span class="jh-input-label">任务模板icon</span> 
-                <v-text-field class="jh-v-input" dense single-line filled v-model="updateItem.taskTemplateIcon" :rules="validationRules.requireRules"></v-text-field>
+                <icon-picker class="jh-v-input" :dense="true" :single-line="true" :filled="true" v-model="updateItem.taskTemplateIcon" :rules="validationRules.requireRules"></icon-picker>
               </v-col>
               <v-col cols="12" sm="12" md="12" >
                 <span class="jh-input-label">审批人列表</span> 
@@ -236,6 +236,7 @@
 {% include 'common/jianghuJs/fixedTableHeightV4.html' %}
 {% include 'component/tableRecordHistory.html' %}
 {% include "component/task-approval-person-list.html" %}
+{% include "component/icon-picker.html" %}
 
 <script type="module">
 new Vue({

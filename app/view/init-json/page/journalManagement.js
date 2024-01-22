@@ -45,6 +45,13 @@ const content = {
         operation: 'jhDelete',
       },
     },
+    {
+      actionId: 'selectRecordHistory',
+      resourceType: 'sql',
+      resourceHook: {},
+      desc: '✅查询操作记录',
+      resourceData: { "table": "_record_history", "operation": "select" },
+    },
   ], // 额外resource { actionId, resourceType, resourceData }
   drawerList: [], // 抽屉列表 { key, title, contentList }
   includeList: [
