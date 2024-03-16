@@ -9,14 +9,17 @@ const eggJianghuDir = path.join(eggJianghuDirResolve, '../');
 
 module.exports = appInfo => {
 
+  const projectId = 'jianghujs_enterprise';
   const appId = 'jianghu-oa';
 
   return {
     appId,
+    projectId,
     appTitle: '办公应用',
     appLogo: `${appId}/public/img/logo.png`,
-    appDirectoryLink: 'http://127.0.0.1:7273/directory',
-    indexPage: `/${appId}/page/workbench`,
+    appType: 'multiApp',
+    appDirectoryLink: '/directory',
+    indexPage: `/${appId}/page/ticketStartApply`,
     loginPage: `/${appId}/page/login`,
     helpPage: `/${appId}/page/help`,
 
@@ -36,6 +39,7 @@ module.exports = appInfo => {
         { prefix: `/${appId}/public/`, dir: path.join(eggJianghuDir, 'app/public') },
       ],
     },
+    enableUploadStaticFileAuthorization: true,
 
     view: {
       defaultViewEngine: 'nunjucks',

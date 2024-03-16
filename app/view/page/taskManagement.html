@@ -206,16 +206,6 @@
               </v-col>
 
               <v-col cols="12" sm="12" md="4">
-                <span class="jh-input-label">任务描述</span>
-                <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskDesc"></v-text-field>
-              </v-col>
-
-              <v-col cols="12" sm="12" md="4">
-                <span class="jh-input-label">任务优先级</span>
-                <v-autocomplete :items="constantObj.taskLevel" class="jh-v-input" dense single-line filled v-model="createItem.taskLevel"></v-autocomplete>
-              </v-col>
-
-              <v-col cols="12" sm="12" md="4">
                 <span class="jh-input-label">负责人</span>
                 <v-autocomplete :items="userList" class="jh-v-input" item-text="username" item-value="userId" dense single-line filled v-model="createItem.taskManagerId"></v-autocomplete>
               </v-col>
@@ -224,6 +214,17 @@
                 <span class="jh-input-label">参与人</span>
                 <v-autocomplete multiple :items="userList" class="jh-v-input" item-text="username" item-value="userId" dense single-line filled v-model="createItem.taskMemberIdList"></v-autocomplete>
               </v-col>
+
+              <v-col cols="12" sm="12" md="12">
+                <span class="jh-input-label">任务描述</span>
+                <v-textarea class="jh-v-input" dense single-line filled v-model="createItem.taskDesc"></v-textarea>
+              </v-col>
+
+              <v-col cols="12" sm="12" md="4">
+                <span class="jh-input-label">任务优先级</span>
+                <v-autocomplete :items="constantObj.taskLevel" class="jh-v-input" dense single-line filled v-model="createItem.taskLevel"></v-autocomplete>
+              </v-col>
+              
               <v-col cols="12" sm="12" md="4">
                 <span class="jh-input-label">任务标签</span>
                 <v-combobox
@@ -237,7 +238,7 @@
                   small
                 ></v-combobox>
               </v-col>
-
+              <v-col cols="12" sm="12" md="4"></v-col>
               <v-col cols="12" sm="12" md="4">
                 <span class="jh-input-label">任务开始时间</span>
                 <!-- 时间选择 -->
@@ -279,7 +280,7 @@
                 <v-text-field class="jh-v-input" dense single-line filled v-model="createItem.taskFileList"></v-text-field>
               </v-col> -->
 
-              <v-col cols="12" sm="12" md="4">
+              <v-col cols="12" sm="12" md="12">
                 <span class="jh-input-label">子任务列表todo</span>
                 <task-child-list :todos.sync="createItem.taskChildList" />
               </v-col>
@@ -326,24 +327,21 @@
 <div id="app"></div>
 
 {% endblock %} {% block vueScript %}
-<!-- 加载页面静态资源 >>>>>>>>>>>>> -->
-<link
-  rel="stylesheet"
-  href="/<$ ctx.app.config.appId $>/public/plugins/editor.md/css/editormd.min.css"
-/>
-<link
-  href="/<$ ctx.app.config.appId $>/public/articleViewer/font-awesome.min.css?v=6.0.0"
-/>
+
+{% include 'common/constantUtil.html' %}
+{% include 'common/jianghuJs/fixedTableHeightV4.html' %}
+{% include 'component/task-filter-btn.html' %}
+{% include 'component/task-child-list.html' %}
+{% include 'common/excelUtil.html' %}
+{% include 'component/view-task-detail-drawer.html' %}
+{% include 'component/task-attachment-list.html' %}
+{% include 'component/task-detail-drawer.html' %}
+{% include 'component/select-file-dialog.html' %}
+
+<link rel="stylesheet" href="/<$ ctx.app.config.appId $>/public/plugins/editor.md/css/editormd.min.css" />
 <script src="/<$ ctx.app.config.appId $>/public/lib/jquery/jquery.min.js"></script>
 <script src="/<$ ctx.app.config.appId $>/public/plugins/editor.md/editormd.js"></script>
-<!-- <<<<<<<<<<<<< 加载页面静态资源 -->
-{% include 'common/constantUtil.html' %}' {% include
-'common/jianghuJs/fixedTableHeightV4.html' %} {% include
-'component/task-filter-btn.html' %} {% include 'component/task-child-list.html'
-%} {% include 'common/excelUtil.html' %} {% include
-'component/view-task-detail-drawer.html' %} {% include
-'component/task-attachment-list.html' %} {% include
-'component/task-detail-drawer.html' %}
+
 <script type="module">
   new Vue({
     el: '#app',
@@ -554,7 +552,6 @@
                 pageId: 'allPage',
                 actionId: 'getUserList',
                 actionData: {},
-                orderBy: [{ column: 'operationAt', order: 'desc' }],
               },
             },
           })
@@ -607,7 +604,7 @@
       },
 
       async doCreateItem() {
-        await window.jhMask.show();
+        
         await window.vtoast.loading('新增数据');
         const result = await window.jianghuAxios({
           data: {
@@ -628,7 +625,7 @@
           ...this.createActionData,
           rowId: result.data.appData.resultData.rows[0],
         });
-        await window.jhMask.hide();
+        
         await window.vtoast.success('新增数据成功');
       },
       async closeCreateDrawer() {
@@ -675,7 +672,7 @@
       },
 
       async doUpdateItem() {
-        await window.jhMask.show();
+        
         await window.vtoast.loading('修改数据');
         await window.jianghuAxios({
           data: {
@@ -692,7 +689,7 @@
           rowId: this.updateItemId,
           ...this.updateActionData,
         });
-        await window.jhMask.hide();
+        
         await window.vtoast.success('修改数据成功');
       },
 
@@ -770,7 +767,7 @@
         await window.jianghuAxios({
           data: {
             appData: {
-              pageId: 'noticeManagement',
+              pageId: 'allPage',
               actionId: 'addNotice',
               actionData: item,
             },

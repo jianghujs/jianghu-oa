@@ -33,6 +33,7 @@ class TicketService extends Service {
       auditedUsers.push(userId);
     }
     const auditConfig = JSON.parse(task.taskAuditConfig);
+    const noticeConfig = JSON.parse(task.taskNoticeConfig);
     const userAudit = auditConfig.find(item => item.userId === userId && !item.status);
     if (userAudit) {
       userAudit.username = username;
@@ -57,11 +58,11 @@ class TicketService extends Service {
     // 使用事务更新
     await jianghuKnex.transaction(async trx => {
       // 通知下申请人
-      await this.ctx.service.notice.addNotice({
-        taskMemberIdList: [task.taskManagerId],
-        taskTitle: `审批进度提醒`,
-        taskDesc: `${username} ${userAudit.status}了您<a>《${task.taskTitle}》</a>，请知晓`,
-      })
+      // await this.ctx.service.notice.addNotice({
+      //   taskMemberIdList: [task.taskManagerId],
+      //   taskTitle: `审批进度提醒`,
+      //   taskDesc: `${username} ${userAudit.status}了您<a>《${task.taskTitle}》</a>，请知晓`,
+      // })
 
       // 更新task
       await jianghuKnex(tableEnum.task).where({ taskId }).update({
@@ -69,9 +70,14 @@ class TicketService extends Service {
         taskAuditConfig: JSON.stringify(auditConfig),
         ...updateTaskData,
       });
+
+      // TODO:taskStatus为已完成，将给所有抄送人发通知,noticeConfig
+      await this.ctx.service.notice.addApprovalNotice({
+        ...task,
+        ...updateTaskData,
+        taskAuditConfig: JSON.stringify(auditConfig)
+      })
     })
-
-
   }
 }
 

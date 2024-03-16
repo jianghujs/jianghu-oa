@@ -6,8 +6,10 @@ require('dotenv').config({path: path.resolve(__dirname, '../../../.env')});
 module.exports = appInfo => {
 
   return {
-    appType: 'multiApp',
-    appDirectoryLink: '/directory',
+    // appType: 'multiApp',
+    // appDirectoryLink: '/directory',
+    // authTokenKey: 'directory',
+    // loginPage: '/directory/page/login',
     jiangHuConfig: {
       packageIdCheck: false,
       updateRequestDemoAndResponseDemo: false,
@@ -32,7 +34,7 @@ module.exports = appInfo => {
           port: process.env.DB_PORT,
           user: process.env.DB_USER,
           password: process.env.DB_PASSWORD,
-          database: 'jianghu_oa',
+          database: 'jh_enterprise_v2_task',
         },
         pool: { min: 0, max: 10 },
         acquireConnectionTimeout: 30000,

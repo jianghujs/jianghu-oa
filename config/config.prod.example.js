@@ -5,9 +5,11 @@ const path = require('path');
 module.exports = appInfo => {
 
   return {
+    appType: 'multiApp',
+    appDirectoryLink: '/directory',
     authTokenKey: 'directory',
     loginPage: '/directory/page/login',
-    appDirectoryLink: '/directory',
+    appRootUrl: '',
     jiangHuConfig: {
       packageIdCheck: true,
       updateRequestDemoAndResponseDemo: false,
@@ -20,7 +22,7 @@ module.exports = appInfo => {
           port: '3306',
           user: 'root',
           password: '123456',
-          database: 'jianghu_oa',
+          database: 'jh_enterprise_v2_task',
         },
         pool: { min: 0, max: 10 },
         acquireConnectionTimeout: 30000,
