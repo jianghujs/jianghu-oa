@@ -9,16 +9,12 @@ const eggJianghuDir = path.join(eggJianghuDirResolve, '../');
 
 module.exports = appInfo => {
 
-  const projectId = 'jianghujs_enterprise';
   const appId = 'jianghu-oa';
 
   return {
     appId,
-    projectId,
     appTitle: '办公应用',
     appLogo: `${appId}/public/img/logo.png`,
-    appType: 'multiApp',
-    appDirectoryLink: '/directory',
     indexPage: `/${appId}/page/ticketStartApply`,
     loginPage: `/${appId}/page/login`,
     helpPage: `/${appId}/page/help`,
