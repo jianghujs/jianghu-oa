@@ -217,7 +217,7 @@
 
               <v-col cols="12" sm="12" md="12">
                 <span class="jh-input-label">任务描述</span>
-                <v-textarea class="jh-v-input" dense single-line filled v-model="createItem.taskDesc"></v-textarea>
+                <v-textarea class="jh-v-input" dense single-line filled v-model="createItem.taskContent"></v-textarea>
               </v-col>
 
               <v-col cols="12" sm="12" md="4">
@@ -598,6 +598,7 @@
         data.taskMemberIdList = data.taskMemberIdList.join(',');
         data.taskChildList = JSON.stringify(data.taskChildList);
         data.taskCreateAt = dayjs().format('YYYY-MM-DD HH:mm:ss');
+        data.taskTag = (data.taskTag || []).join(',');
         data.taskType = '任务';
         data.taskFileList = JSON.stringify(data.taskFileList);
         this.createActionData = data;
